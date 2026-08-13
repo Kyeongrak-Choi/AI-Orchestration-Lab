@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>도서 목록</title></head>
+<body>
+<h1>도서 목록</h1>
+    <button id="loadBtn">목록 불러오기</button>
+    <ul id="result"></ul>
+    <script>
+        document.getElementById("loadBtn").addEventListener("click", async () => {
+    const books = await (await fetch("/books")).json();
+
+    const tbody = document.getElementById("result");
+    tbody.innerHTML = "";
+
+    for (const book of books) {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${book.id}</td>
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.year}</td>
+        `;
+
+        tbody.appendChild(tr);
+    }
+});
+</script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+</body>
+</html>
