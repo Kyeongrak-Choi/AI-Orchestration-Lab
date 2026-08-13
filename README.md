@@ -1,4 +1,4 @@
-# [Encore]ai-orchestration-lab
+# [Encore]AI Orchestration lab
 
 <details>
 <summary>2026-git-start</summary>
