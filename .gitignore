@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+2026_aio2_fastapi/__pycache__/
 
 # Virtual environments
 .venv/
