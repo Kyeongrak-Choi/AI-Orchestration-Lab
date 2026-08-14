@@ -2,6 +2,9 @@ from fastapi import FastAPI, status, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
+import asyncio
+import time
+import httpx
 
 
 class Publisher(BaseModel):
@@ -59,6 +62,17 @@ books = [
     {"id": 5, "title": "FastAPI로 배우는 백엔드", "author": "이영희", "year":2024},
 ]
 
+params_value = {
+    "latitude" : "37.5168"
+    , "longitude" : "126.7074"
+    , "current" : "temperature_2m,relative_humidity_2m"
+    , "timezone" : "Asia/Seoul"
+}
+
+url ="https://api.open-meteo.com/v1/forecast"
+
+
+# GET
 @app.get("/health")
 def health():
     return {"status" : "healthy"}
@@ -100,6 +114,27 @@ def read_book(book_id:int):
     raise HTTPException(status_code = 404
                         , detail = "not Found Book")
 
+@app.get("/slow-async")
+async def slow_async():
+    await asyncio.sleep(3) # 비동기
+    return {"type": "async","message": "3초 대기 완료"}
+
+@app.get("/slow-block")
+async def slow_block():
+    time.sleep(3)
+    return {"type": "block","message": "3초 대기 완료"}
+
+@app.get("/weather/raw")
+async def weather_raw():
+    async with httpx.AsyncClient(timeout=5) as client:
+        response = await client.get(
+            url
+            , params = params_value
+        )
+        return response.json()
+
+
+# POST
 @app.post("/books"
           , response_model = BookResponse
           , status_code = status.HTTP_201_CREATED)
