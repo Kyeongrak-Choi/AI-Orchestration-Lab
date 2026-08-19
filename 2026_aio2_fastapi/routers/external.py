@@ -1,12 +1,8 @@
-import time
-
 import httpx
 from fastapi import APIRouter, HTTPException
 
 from database import books, save_books
 from external_api import (
-    fetch_books,
-    #  fetch_books_multi,
     fetch_weather,
     #   load_fallback_books,
 )
@@ -41,49 +37,49 @@ async def weather(latitude: float = 36.8, longitude: float = 127.1):
         raise HTTPException(status_code=502, detail="외부 API에 연결할 수 없습니다")
 
 
-@router.get(
-    "/books/external",
-    response_model=list[ExternalBook],
-    summary="Google Books 검색",
-    responses={
-        502: {"description": "외부 API 연결 실패 또는 오류 응답", "model": ErrorDetail},
-        504: {"description": "외부 API 응답 지연", "model": ErrorDetail},
-    },
-)
-async def search_external_books(keyword: str, limit: int = 5, fallback: bool = False):
-    """
-    Google Books에서 도서를 검색합니다.
+# @router.get(
+#     "/books/external",
+#     response_model=list[ExternalBook],
+#     summary="Google Books 검색",
+#     responses={
+#         502: {"description": "외부 API 연결 실패 또는 오류 응답", "model": ErrorDetail},
+#         504: {"description": "외부 API 응답 지연", "model": ErrorDetail},
+#     },
+# )
+# async def search_external_books(keyword: str, limit: int = 5, fallback: bool = False):
+#     """
+#     Google Books에서 도서를 검색합니다.
 
-    - **keyword**: 검색어. 한국어도 가능합니다
-    - **limit**: 가져올 개수. 기본 5
-    - **fallback**: true이면 외부 API 실패 시 예비 데이터를 반환합니다
-    """
-    try:
-        return await fetch_books(keyword, limit)
-    except httpx.TimeoutException:
-        if fallback:
-            return load_fallback_books()
-        raise HTTPException(status_code=504, detail="외부 API 응답이 지연됩니다")
-    except httpx.HTTPStatusError:
-        if fallback:
-            return load_fallback_books()
-        raise HTTPException(status_code=502, detail="외부 API가 오류를 반환했습니다")
-    except httpx.RequestError:
-        if fallback:
-            return load_fallback_books()
-        raise HTTPException(status_code=502, detail="외부 API에 연결할 수 없습니다")
+#     - **keyword**: 검색어. 한국어도 가능합니다
+#     - **limit**: 가져올 개수. 기본 5
+#     - **fallback**: true이면 외부 API 실패 시 예비 데이터를 반환합니다
+#     """
+#     try:
+#         return await fetch_books(keyword, limit)
+#     except httpx.TimeoutException:
+#         if fallback:
+#             return load_fallback_books()
+#         raise HTTPException(status_code=504, detail="외부 API 응답이 지연됩니다")
+#     except httpx.HTTPStatusError:
+#         if fallback:
+#             return load_fallback_books()
+#         raise HTTPException(status_code=502, detail="외부 API가 오류를 반환했습니다")
+#     except httpx.RequestError:
+#         if fallback:
+#             return load_fallback_books()
+#         raise HTTPException(status_code=502, detail="외부 API에 연결할 수 없습니다")
 
 
-@router.get("/books/external/multi", summary="여러 키워드 동시 검색")
-async def search_multi(keywords: str = "python,fastapi,django"):
-    """쉼표로 구분한 여러 키워드를 동시에 검색합니다."""
-    words = [w.strip() for w in keywords.split(",") if w.strip()]
+# @router.get("/books/external/multi", summary="여러 키워드 동시 검색")
+# async def search_multi(keywords: str = "python,fastapi,django"):
+#     """쉼표로 구분한 여러 키워드를 동시에 검색합니다."""
+#     words = [w.strip() for w in keywords.split(",") if w.strip()]
 
-    start = time.perf_counter()
-    results = await fetch_books_multi(words)
-    elapsed = round(time.perf_counter() - start, 2)
+#     start = time.perf_counter()
+#     results = await fetch_books_multi(words)
+#     elapsed = round(time.perf_counter() - start, 2)
 
-    return {"elapsed_seconds": elapsed, "results": results}
+#     return {"elapsed_seconds": elapsed, "results": results}
 
 
 @router.post(
