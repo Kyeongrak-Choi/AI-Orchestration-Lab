@@ -26,7 +26,7 @@ class BookCreate(BaseModel):
     @field_validator("year")
     @classmethod
     def year_check(cls, v: str) -> str:
-        if v > datetime.now().year:
+        if v > datetime.datetime.now().year:
             raise ValueError("The year cannot be greater than the current year")
         return v
 
@@ -49,5 +49,13 @@ class WeatherResponse(BaseModel):
 
 class GoogleBooks(BaseModel):
     title: str
-    authors: list[str] = Field(default_factory = list)
-    published_Date : str = ""
+    authors: list[str] = Field(default_factory=list)
+    published_Date: str = ""
+
+
+class BookUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    author: str | None = Field(default=None, min_length=1, max_length=50)
+    year: int | None = Field(default=None, ge=1900, le=2100)
+    tags: list[str] | None = None
+    publisher: Publisher | None = None

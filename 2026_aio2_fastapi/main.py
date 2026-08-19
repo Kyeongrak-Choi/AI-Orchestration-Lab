@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.staticfiles import StaticFiles
 
 from external_api import fetch_books, fetch_weather
-from schemas import BookCreate, BookResponse, GoogleBooks, WeatherResponse
+from schemas import BookCreate, BookResponse, BookUpdate, GoogleBooks, WeatherResponse
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -26,6 +26,14 @@ params_value = {
 }
 
 url = "https://api.open-meteo.com/v1/forecast"
+
+
+def get_book_or_404(book_id: int) -> dict:
+    """번호로 도서를 찾고, 없으면 404를 발생시킨다."""
+    for b in books:
+        if b["id"] == book_id:
+            return b
+    raise HTTPException(status_code=404, detail="Not found book")
 
 
 @app.get("/health")
@@ -131,7 +139,75 @@ def create_book(book: BookCreate):
 
 @app.get("/books/{book_id}", response_model=BookResponse)
 def read_book(book_id: int):
-    for book in books:
-        if book["id"] == book_id:
-            return book
-    raise HTTPException(status_code=404, detail="not Found Book")
+    # for book in books:
+    #     if book["id"] == book_id:
+    #         return book
+    # raise HTTPException(status_code=404, detail="Not Found Book")
+    return get_book_or_404(book_id)
+
+
+@app.put(
+    "/books/{book_id}",
+    response_model=BookResponse,
+    tags=["Book"],
+    summary="Update Book",
+    responses={404: {"description": "Not Found Book"}},
+)
+def update_book(book_id: int, book: BookCreate):
+    """
+    도서 정보를 전체 교체합니다. 보내지 않은 필드는 기본값으로 바뀝니다.
+    일부만 고치려면 PATCH를 사용하세요.
+    """
+    # for i, b in enumerate(books):
+    #     if b["id"] == book_id:
+    #         books[i] = {"id": book_id, **book.model_dump()}
+    #         # Success
+    #         return books[i]
+    # # Fail
+    # raise HTTPException(status_code=404, detail="Not found book")
+    old = get_book_or_404(book_id)
+    new_book = {"id": book_id, **book.model_dump()}
+    books[books.index(old)] = new_book
+    return new_book
+
+
+@app.patch(
+    "/books/{book_id}",
+    response_model=BookResponse,
+    tags=["book"],
+    summary="update book part",
+    responses={404: {"description": "Not found book"}},
+)
+def patch_book(book_id: int, patch: BookUpdate):
+    """
+    보낸 필드만 수정합니다. 보내지 않은 필드는 그대로 유지됩니다.
+    """
+    # for b in books:
+    #     if b["id"] == book_id:
+    #         changes = patch.model_dump(exclude_unset=True)
+    #         b.update(changes)
+    #         return b
+    # raise HTTPException(status_code=404, detail="Not found book")
+    book = get_book_or_404(book_id)
+    book.update(patch.model_dump(exclude_unset=True))
+    return book
+
+
+@app.delete(
+    "/books/{book_id}",
+    status_code=204,
+    tags=["도서"],
+    summary="도서 삭제",
+    responses={404: {"description": "Not found book"}},
+)
+def delete_book(book_id: int):
+    """
+    도서를 삭제합니다. 성공 시 본문 없이 204를 반환합니다.
+    """
+    # for i, b in enumerate(books):
+    #     if b["id"] == book_id:
+    #         books.pop(i)
+    #         return None
+    # raise HTTPException(status_code=404, detail="Not found book")
+    book = get_book_or_404(book_id)
+    books.remove(book)
