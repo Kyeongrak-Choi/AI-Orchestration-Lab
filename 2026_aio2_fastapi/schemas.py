@@ -59,3 +59,13 @@ class BookUpdate(BaseModel):
     year: int | None = Field(default=None, ge=1900, le=2100)
     tags: list[str] | None = None
     publisher: Publisher | None = None
+
+
+class ErrorDetail(BaseModel):
+    detail: str = Field(description="오류 메시지", examples=["도서를 찾을 수 없습니다"])
+
+
+class ExternalBook(BaseModel):
+    title: str = Field(description="도서 제목", examples=["처음 시작하는 FastAPI"])
+    authors: list[str] = Field(default_factory=list, description="저자 목록")
+    published_date: str = Field(default="", description="발행일. 없을 수 있음")

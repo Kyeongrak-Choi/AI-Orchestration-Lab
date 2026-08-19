@@ -9,6 +9,7 @@ venv/
 env/
 ENV/
 
+
 # Environment variables / secrets
 .env
 .env.*
@@ -54,3 +55,6 @@ Thumbs.db
 *.tmp
 *.temp
 2026_aio2_fastapi/__pycache__/main.cpython-313.pyc
+
+
+books_data.json
