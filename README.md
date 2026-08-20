@@ -258,7 +258,6 @@ uvicorn main:app --reload
 <details>
 <summary>2026-aio2_llm-api</summary>
 
-@ -0,0 +1,166 @@
 # LLM API 기초 실습
 
 Gemini와 OpenAI API를 직접 호출하며 LLM 애플리케이션의 기본 개념을 익히는 실습 프로젝트입니다. 첫 API 호출부터 토큰과 비용, 생성 파라미터, 멀티턴 대화까지 단계적으로 학습하고, 마지막에는 Gemini 호출을 FastAPI 엔드포인트로 감쌉니다.
