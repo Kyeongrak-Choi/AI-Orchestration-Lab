@@ -429,6 +429,8 @@ Invoke-RestMethod `
 
 <details>
 <summary>2026-aio2_db-dev/sql</summary>
+
+기본 SQL 문법 연습 프로젝트
     
 </details>
 <details>
