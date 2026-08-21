@@ -31,15 +31,17 @@ app = FastAPI(title="llm-api-basic", version="0.1.0")
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=500)
-    # TODO: temperature 를 추가한다. 기본값 0.7, 허용 범위는 노트북 03에서 확인한 값으로 제한한다
-    # TODO: max_output_tokens 를 추가한다. 기본값 256, 1 이상 2048 이하
-    # TODO: system_instruction 을 추가한다. 없어도 되는 값이다
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_output_tokens: int = Field(default=256, ge=1, le=2048)
+    system_instruction: str | None = None
 
 
 class Usage(BaseModel):
     input_tokens: int
     output_tokens: int
     total_tokens: int
+    thoughts_tokens: int | None = None
+    cached_content_tokens: int | None = None
 
 
 class AskResponse(BaseModel):
@@ -51,7 +53,11 @@ class AskResponse(BaseModel):
 @app.get("/health")
 def health():
     """서버가 살아있는지 확인. 키 값 자체는 절대 돌려주지 않는다."""
-    return {"status": "ok", "model": MODEL, "key_loaded": bool(os.getenv("GEMINI_API_KEY"))}
+    return {
+        "status": "ok",
+        "model": MODEL,
+        "key_loaded": bool(os.getenv("GEMINI_API_KEY")),
+    }
 
 
 @app.post("/ask", response_model=AskResponse)
@@ -61,11 +67,15 @@ def ask(req: AskRequest):
         # TODO: req 의 temperature / max_output_tokens / system_instruction 을 넘긴다
     )
     try:
-        r = client.models.generate_content(model=MODEL, contents=req.question, config=config)
+        r = client.models.generate_content(
+            model=MODEL, contents=req.question, config=config
+        )
     except Exception as e:
         # TODO: 429 / 503 처럼 일시적인 오류는 클라이언트에 503 으로 내려준다.
         #       우리 코드의 버그가 아니므로 500 을 쓰지 않는다 (노트북 02 참고)
-        raise HTTPException(status_code=502, detail=f"{type(e).__name__}: {str(e)[:200]}") from e
+        raise HTTPException(
+            status_code=502, detail=f"{type(e).__name__}: {str(e)[:200]}"
+        ) from e
 
     u = r.usage_metadata
     return AskResponse(
@@ -75,3 +85,18 @@ def ask(req: AskRequest):
         #       Gemini 쪽 이름과 우리 API 의 이름이 다르다 — 무엇이 무엇에 대응하는지 확인할 것
         usage=Usage(input_tokens=0, output_tokens=0, total_tokens=0),
     )
+
+
+# r = client.post(
+#     "/ask",
+#     json={
+#         "question": "배고파죽겠어 점심 뭐먹을까 선택지를 줄게 1.육전국밥 2.샐러디 3.버거킹",
+#         "system_instruction": "짧고 간결하게",
+#         "temperature": 0.0,
+#         "max_output_tokens": 50,
+#     },
+# )
+
+# print(r.status_code, r.json())
+# print(r.json()["answer"])
+# print("사용량:", r.json()["usage"])
