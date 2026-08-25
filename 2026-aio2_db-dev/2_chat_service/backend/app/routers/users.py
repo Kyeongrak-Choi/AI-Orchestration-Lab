@@ -53,11 +53,20 @@ def create_user(user_info: UserCreate):
 #   · .order("created_at", desc=True) 로 최신 가입순
 
 
+# @router.get("", response_model=list[UserOut])
+# def list_users():
+#     result = (
+#         supabase.table("users").select("*").order("created_at", desc=True).execute()
+#     )
+#     return result.data
+
+# 연습문제 3. 이메일로 사용자 찾기
 @router.get("", response_model=list[UserOut])
-def list_users():
-    result = (
-        supabase.table("users").select("*").order("created_at", desc=True).execute()
-    )
+def list_users(email: str | None = None):
+    query = supabase.table("users").select("*")
+    if email:
+        query = query.eq("email", email)
+    result = query.order("created_at", desc=True).execute()
     return result.data
 
 

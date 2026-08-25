@@ -142,8 +142,25 @@ def delete_user(id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Not found conversation")
 
-# 연습문제 3. 이메일로 사용자 찾기
-
-
 
 # 연습문제 4. 메시지 목록 페이지 나누기
+@router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+def list_messages(conversation_id: UUID, limit: int = 20, offset: int = 0):
+    conversation = (
+        supabase.table("conversations")
+        .select("id")
+        .eq("id", str(conversation_id))
+        .execute()
+    )
+    if not conversation.data:
+        raise HTTPException(status_code=404, detail="대화를 찾을 수 없습니다")
+
+    result = (
+        supabase.table("messages")
+        .select("*")
+        .eq("conversation_id", str(conversation_id))
+        .order("created_at", desc=False)
+        .range(offset, offset + limit - 1)
+        .execute()
+    )
+    return result.data
