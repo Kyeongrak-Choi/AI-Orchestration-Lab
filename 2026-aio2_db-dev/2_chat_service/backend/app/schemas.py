@@ -18,22 +18,39 @@ from pydantic import BaseModel, EmailStr, Field
 # ── 사용자 ────────────────────────────────────────────────────────
 # TODO 1. UserCreate  — email(EmailStr), username(2~30자)
 
-class UserCreate(BaseModel):
-    email: EmailStr
-    username: str = Field(min_length=2, max_lengjth=30)
+# class UserCreate(BaseModel):
+#     email: EmailStr
+#     username: str = Field(min_length=2, max_lengjth=30)
     
-# TODO 2. UserUpdate  — username 만
+# # TODO 2. UserUpdate  — username 만
 
-class UserUpdate(BaseModel):
-    username: str = Field(min_length=2, max_length=30)
+# class UserUpdate(BaseModel):
+#     username: str = Field(min_length=2, max_length=30)
 
-# TODO 3. UserOut     — id(UUID), email, username, created_at(datetime)
+# # TODO 3. UserOut     — id(UUID), email, username, created_at(datetime)
 
-class UserOut(BaseModel):
-    id: UUID
+# class UserOut(BaseModel):
+#     id: UUID
+#     email: str
+#     username: str
+#     created_at: datetime
+
+# 회원가입용 요청
+class SignupRequest(BaseModel):
     email: str
-    username: str
-    created_at: datetime
+    password: str
+
+# 회원로그인용 요청
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+# 회원 응답
+class TokenResponse(BaseModel):
+    access_token: str | None
+    user_id: str
+    email: str
+
 
 # ── 대화 ──────────────────────────────────────────────────────────
 # TODO 4. ConversationCreate — user_id(UUID), title(1~100자)
@@ -56,7 +73,7 @@ class ConversationOut(BaseModel):
 # TODO 6. MessageCreate — role(Literal), content(1자 이상)
 
 class MessageCreate(BaseModel):
-    role: Literal["user", "assistant"]
+    role: Literal["user", "assistant","system"]
     content: str = Field(min_length=1)
 
 # TODO 7. MessageOut    — id, conversation_id, role, content, created_at
@@ -67,3 +84,13 @@ class MessageOut(BaseModel):
     role: str
     content: str
     created_at: datetime
+
+
+class ProfileOut(BaseModel):
+    id: UUID
+    username: str
+    created_at: datetime
+
+
+class ProfileUpdate(BaseModel):
+    username: str = Field(min_length=2, max_length=30)

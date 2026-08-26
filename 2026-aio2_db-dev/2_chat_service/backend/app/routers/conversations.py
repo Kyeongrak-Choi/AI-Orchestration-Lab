@@ -30,7 +30,10 @@ router = APIRouter(prefix="/conversations", tags=["conversations"])
 @router.post("", response_model=ConversationOut, status_code=201)
 def create_conversation(conv_info: ConversationCreate):
     user = (
-        supabase.table("users").select("id").eq("id", str(conv_info.user_id)).execute()
+        supabase.table("profiles")
+        .select("id")
+        .eq("id", str(conv_info.user_id))
+        .execute()
     )
     if not user.data:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
@@ -100,25 +103,25 @@ def create_message(conversation_id: UUID, payload: MessageCreate):
 #   · .order("created_at", desc=False)
 
 
-@router.get("/{conversation_id}/messages", response_model=list[MessageOut])
-def list_messages(conversation_id: UUID):
-    conversation = (
-        supabase.table("conversations")
-        .select("id")
-        .eq("id", str(conversation_id))
-        .execute()
-    )
-    if not conversation.data:
-        raise HTTPException(status_code=404, detail="Not found conversation")
+# @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+# def list_messages(conversation_id: UUID):
+#     conversation = (
+#         supabase.table("conversations")
+#         .select("id")
+#         .eq("id", str(conversation_id))
+#         .execute()
+#     )
+#     if not conversation.data:
+#         raise HTTPException(status_code=404, detail="Not found conversation")
 
-    result = (
-        supabase.table("messages")
-        .select("*")
-        .eq("conversation_id", str(conversation_id))
-        .order("created_at", desc=False)
-        .execute()
-    )
-    return result.data
+#     result = (
+#         supabase.table("messages")
+#         .select("*")
+#         .eq("conversation_id", str(conversation_id))
+#         .order("created_at", desc=False)
+#         .execute()
+#     )
+#     return result.data
 
 
 # 연습문제1. 대화 제목 수정

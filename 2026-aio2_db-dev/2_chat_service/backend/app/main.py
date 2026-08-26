@@ -6,20 +6,17 @@
 
 from fastapi import FastAPI
 
-from app.routers import conversations, users
+from app.routers import auth, conversations, me
 
 app = FastAPI(title="chat-service", version="0.1.0")
 
-
-# 주의: 라우터는 실습 4와 실습 6에서 하나씩 등록한다.
-# 파일을 만들기 전에 import 하면 ModuleNotFoundError 로 서버가 아예 뜨지 않는다.
-# TODO 1. (실습 4) from app.routers import users  ->  app.include_router(users.router)
-app.include_router(users.router)
-
-# TODO 2. (실습 6) from app.routers import conversations  ->  app.include_router(conversations.router)
+app.include_router(auth.router)
 app.include_router(conversations.router)
+app.include_router(me.router)
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
