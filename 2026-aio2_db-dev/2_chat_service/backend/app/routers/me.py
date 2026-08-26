@@ -2,15 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.db import get_anon_client
 from app.deps import CurrentUser, get_current_user
-from app.schemas import ConversationOut, ProfileOut
+from app.schemas import ConversationOut, ProfileOut, ProfileUpdate
 
 router = APIRouter(prefix="/me", tags=["me"])
 
 
 @router.get("")
 def read_me(current_user: CurrentUser = Depends(get_current_user)):
-    return {"id": current_user.id, 
-            "email": current_user.email}
+    return {"id": current_user.id, "email": current_user.email}
 
 
 @router.get("/conversations", response_model=list[ConversationOut])
@@ -31,6 +30,19 @@ def read_my_profile(current_user: CurrentUser = Depends(get_current_user)):
     client = get_anon_client()
     client.postgrest.auth(current_user.token)
     result = client.table("profiles").select("*").execute()
+    if not result.data:
+        raise HTTPException(status_code=404, detail="프로필을 찾을 수 없습니다")
+    return result.data[0]
+
+
+@router.patch("/profile", response_model=ProfileOut)
+def update_my_profile(
+    payload: ProfileUpdate,
+    current_user: CurrentUser = Depends(get_current_user),
+):
+    client = get_anon_client()
+    client.postgrest.auth(current_user.token)
+    result = client.table("profiles").update({"username": payload.username}).eq("id",current_user.id).execute()
     if not result.data:
         raise HTTPException(status_code=404, detail="프로필을 찾을 수 없습니다")
     return result.data[0]
