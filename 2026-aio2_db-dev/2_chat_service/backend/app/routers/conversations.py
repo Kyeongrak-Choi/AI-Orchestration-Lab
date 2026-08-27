@@ -7,10 +7,12 @@ POST     /conversations/{id}/messages          메시지 저장             201
 GET      /conversations/{id}/messages          메시지 목록             200
 """
 
+import json
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
+from app.cache import cache_delete, cache_get, cache_set
 from app.db import supabase
 from app.schemas import ConversationCreate, ConversationOut, MessageCreate, MessageOut
 
@@ -18,6 +20,12 @@ from app.schemas import ConversationCreate, ConversationOut, MessageCreate, Mess
 #         MessageCreate, MessageOut 을 가져온다
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
+
+MESSAGES_CACHE_TTL_SECONDS = 300
+
+
+def _messages_cache_key(conversation_id: UUID) -> str:
+    return f"messages:{conversation_id}"
 
 
 # ── 실습 6 ────────────────────────────────────────────────────────
@@ -95,6 +103,7 @@ def create_message(conversation_id: UUID, payload: MessageCreate):
         )
         .execute()
     )
+    cache_delete(_messages_cache_key(conversation_id))  # 이 줄을 추가
     return result.data[0]
 
 
@@ -147,23 +156,44 @@ def delete_user(id: UUID):
 
 
 # 연습문제 4. 메시지 목록 페이지 나누기
+# @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+# def list_messages(conversation_id: UUID, limit: int = 20, offset: int = 0):
+#     conversation = (
+#         supabase.table("conversations")
+#         .select("id")
+#         .eq("id", str(conversation_id))
+#         .execute()
+#     )
+#     if not conversation.data:
+#         raise HTTPException(status_code=404, detail="대화를 찾을 수 없습니다")
+
+#     result = (
+#         supabase.table("messages")
+#         .select("*")
+#         .eq("conversation_id", str(conversation_id))
+#         .order("created_at", desc=False)
+#         .range(offset, offset + limit - 1)
+#         .execute()
+#     )
+#     return result.data
+
+
 @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
-def list_messages(conversation_id: UUID, limit: int = 20, offset: int = 0):
-    conversation = (
-        supabase.table("conversations")
-        .select("id")
-        .eq("id", str(conversation_id))
-        .execute()
-    )
-    if not conversation.data:
-        raise HTTPException(status_code=404, detail="대화를 찾을 수 없습니다")
+def list_messages(conversation_id: UUID):
+    cache_key = _messages_cache_key(conversation_id)
+
+    cached = cache_get(cache_key)
+    if cached:
+        return json.loads(cached)
 
     result = (
         supabase.table("messages")
         .select("*")
         .eq("conversation_id", str(conversation_id))
         .order("created_at", desc=False)
-        .range(offset, offset + limit - 1)
         .execute()
+    )
+    cache_set(
+        cache_key, json.dumps(result.data, default=str), ex=MESSAGES_CACHE_TTL_SECONDS
     )
     return result.data
