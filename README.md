@@ -654,6 +654,56 @@ Redis 데이터는 원본이 아닌 사본입니다. 캐시 조회에 실패하�
 
     
 </details>
+
+<details>
+<summary>UI/UX IA 실습</summary>
+
+https://manus.im/
+
+<img width="960" height="905" alt="image" src="https://github.com/user-attachments/assets/8954dd74-3c3c-44e6-8865-b94678bf0852" />
+
+
+Home
+├── Header
+│   ├── Logo
+│   ├── 기능
+│   ├── 솔루션
+│   ├── 자료
+│   ├── 이벤트
+│   ├── 팀
+│   ├── 가격
+│   ├── 로그인
+│   └── 회원가입
+│
+├── Notice Banner
+│   ├── 데이터 삭제 안내
+│   └── 계정 복원하기
+│
+├── Main Section
+│   ├── Hero Title
+│   ├── AI Prompt Input
+│   │   ├── 작업 입력
+│   │   ├── 파일 첨부
+│   │   └── 작업 전송
+│   │
+│   └── Quick Actions
+│       ├── 슬라이드 제작
+│       ├── 웹사이트 구축
+│       ├── 디자인
+│       ├── 게임 제작
+│       └── 더보기
+│
+├── AI Workspace
+│   ├── 작업 생성
+│   ├── AI 처리
+│   └── 결과 확인
+│
+└── Authentication
+    ├── 로그인
+    └── 회원가입
+
+</details>
+
 <details>
 <summary>Coming soon</summary>
 
