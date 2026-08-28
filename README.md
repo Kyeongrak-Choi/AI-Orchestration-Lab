@@ -707,13 +707,15 @@ Home
 
 <details>
     <summary>User FLow</summary>
- <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d6571a36-d597-47a8-86be-a31b80a76117" />
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/960f9762-a70c-4d2b-a25b-489afc0efcf0" />
+
 
 </details>
 
 <details>
     <summary>Wireframe</summary>
- ![Uploading image.png…]()
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/27f54358-6064-4202-a3d2-be4a756e65fc" />
+
 
 </details>
 
