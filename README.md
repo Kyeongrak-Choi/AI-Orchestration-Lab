@@ -662,7 +662,7 @@ https://manus.im/
 
 <img width="960" height="905" alt="image" src="https://github.com/user-attachments/assets/8954dd74-3c3c-44e6-8865-b94678bf0852" />
 
-
+```text
 Home
 ├── Header
 │   ├── Logo
@@ -693,14 +693,12 @@ Home
 │       ├── 게임 제작
 │       └── 더보기
 │
-├── AI Workspace
-│   ├── 작업 생성
-│   ├── AI 처리
-│   └── 결과 확인
-│
-└── Authentication
-    ├── 로그인
-    └── 회원가입
+└── AI Workspace
+     ├── 작업 생성
+     ├── AI 처리
+     └── 결과 확인
+
+```
 
 </details>
 
