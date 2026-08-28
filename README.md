@@ -1,7 +1,23 @@
 # [Encore]AI Orchestration lab
 
+> AI 오케스트레이션 과정에서 진행한 실습과 프로젝트를 한곳에 정리한 학습 기록입니다.
+
+## Projects
+
+- [📖 Git Collaboration](#git-collaboration)
+- [🐍 Python Basic](#python-basic)
+- [⚡ FastAPI Basic](#fastapi-basic)
+- [🤖 LLM API](#llm-api)
+- [🗄 Database Development](#database-development)
+- [🎨 UI / UX Practice](#ui-ux-practice)
+- [🚀 Coming Soon](#coming-soon)
+
+---
+
+<a id="git-collaboration"></a>
+
 <details>
-<summary>2026-git-start</summary>
+<summary><strong>📖 Git Collaboration (2026-git-start)</strong></summary>
 
 -------------------------
 
@@ -106,8 +122,12 @@ git push origin main
 </details>
 
 
+<br />
+
+<a id="python-basic"></a>
+
 <details>
-<summary>2026_aio2_python-basic</summary>
+<summary><strong>🐍 Python Basic (2026_aio2_python-basic)</strong></summary>
 
 # 🐍 Python Basic
 
@@ -140,8 +160,12 @@ A repository for learning Python fundamentals, from basic syntax to object-orien
 
 </details>
 
+<br />
+
+<a id="fastapi-basic"></a>
+
 <details>
-<summary>2026_aio2_fastapi</summary>
+<summary><strong>⚡ FastAPI Basic (2026_aio2_fastapi)</strong></summary>
 
   # 📚 FastAPI Basic
 
@@ -255,8 +279,12 @@ uvicorn main:app --reload
 
 </details>
 
+<br />
+
+<a id="llm-api"></a>
+
 <details>
-<summary>2026-aio2_llm-api</summary>
+<summary><strong>🤖 LLM API (2026-aio2_llm-api)</strong></summary>
 
 # LLM API 기초 실습
 
@@ -427,8 +455,12 @@ Invoke-RestMethod `
 
 </details>
 
+<br />
+
+<a id="database-development"></a>
+
 <details>
-<summary>2026-aio2_db-dev/sql</summary>
+<summary><strong>🗄 Database Development (2026-aio2_db-dev)</strong></summary>
 
 # Database Development 실습
 
@@ -655,15 +687,21 @@ Redis 데이터는 원본이 아닌 사본입니다. 캐시 조회에 실패하�
     
 </details>
 
+<br />
+
+<a id="ui-ux-practice"></a>
+
 <details>
-<summary>UI/UX 실습</summary>
+<summary><strong>🎨 UI / UX Practice</strong></summary>
     https://manus.im/
+<p align="center">
     <img width="960" height="905" alt="image" src="https://github.com/user-attachments/assets/8954dd74-3c3c-44e6-8865-b94678bf0852" />
+</p>
 
     
 
 <details>
-<summary>IA</summary>
+<summary><strong>🗂 IA</strong></summary>
    
 ```text
 Home
@@ -706,24 +744,32 @@ Home
 </details>
 
 <details>
-    <summary>User FLow</summary>
+<summary><strong>👤 User Flow</strong></summary>
+<p align="center">
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/960f9762-a70c-4d2b-a25b-489afc0efcf0" />
+</p>
 
 
 </details>
 
 <details>
-    <summary>Wireframe</summary>
+<summary><strong>🖥️ Wireframe</strong></summary>
+<p align="center">
 <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/27f54358-6064-4202-a3d2-be4a756e65fc" />
+</p>
 
 
 </details>
 
 
 </details>
+
+<br />
+
+<a id="coming-soon"></a>
 
 <details>
-<summary>Coming soon</summary>
+<summary><strong>🚀 Coming Soon</strong></summary>
 
 </details>
 
