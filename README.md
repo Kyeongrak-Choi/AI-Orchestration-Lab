@@ -656,12 +656,15 @@ Redis 데이터는 원본이 아닌 사본입니다. 캐시 조회에 실패하�
 </details>
 
 <details>
-<summary>UI/UX IA 실습</summary>
+<summary>UI/UX 실습</summary>
+    https://manus.im/
+    <img width="960" height="905" alt="image" src="https://github.com/user-attachments/assets/8954dd74-3c3c-44e6-8865-b94678bf0852" />
 
-https://manus.im/
+    
 
-<img width="960" height="905" alt="image" src="https://github.com/user-attachments/assets/8954dd74-3c3c-44e6-8865-b94678bf0852" />
-
+<details>
+<summary>IA</summary>
+   
 ```text
 Home
 ├── Header
@@ -699,6 +702,21 @@ Home
      └── 결과 확인
 
 ```
+    
+</details>
+
+<details>
+    <summary>User FLow</summary>
+ <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/d6571a36-d597-47a8-86be-a31b80a76117" />
+
+</details>
+
+<details>
+    <summary>Wireframe</summary>
+ ![Uploading image.png…]()
+
+</details>
+
 
 </details>
 
