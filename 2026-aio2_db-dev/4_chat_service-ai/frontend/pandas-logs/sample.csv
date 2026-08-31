@@ -1,0 +1,101 @@
+ts,method,path,status_code,duration_ms,user_id,user_agent,시각
+2026-08-24 09:00:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 09:00:00
+2026-08-24 09:02:00,POST,/conversations/ca02135e-92b1-43f2-8ede-0d7ac3baea9e/messages,200,150.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:02:00
+2026-08-24 09:05:00,GET,/health,200,2.0,,python-httpx/0.28.1,2026-08-24 09:05:00
+2026-08-24 09:08:00,POST,/conversations,200,42.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:08:00
+2026-08-24 09:10:00,GET,/health,200,3.0,,python-httpx/0.28.1,2026-08-24 09:10:00
+2026-08-24 09:12:00,GET,/conversations/7e62aa0a-1df9-4d78-9c65-39382b0537e6/messages,200,80.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:12:00
+2026-08-24 09:13:00,POST,/conversations/b774eb52-48db-40af-b215-8370d269a9a5/messages,200,133.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:13:00
+2026-08-24 09:14:00,POST,/conversations,200,92.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:14:00
+2026-08-24 09:15:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 09:15:00
+2026-08-24 09:20:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 09:20:00
+2026-08-24 09:20:00,POST,/conversations/18f135d2-5f55-4203-b018-50c5a38fd547/messages,200,170.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:20:00
+2026-08-24 09:23:00,GET,/me/conversations,200,49.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:23:00
+2026-08-24 09:25:00,GET,/health,200,9.0,,python-httpx/0.28.1,2026-08-24 09:25:00
+2026-08-24 09:29:00,GET,/conversations/6b4cb242-4a23-4596-a217-beaddbc496cb/messages,200,117.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:29:00
+2026-08-24 09:30:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 09:30:00
+2026-08-24 09:33:00,GET,/conversations/57ee05cd-e009-42c7-bebf-f20686734721/messages,200,124.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:33:00
+2026-08-24 09:33:00,GET,/conversations/57ee05cd-e009-42c7-bebf-f20686734721/messages,200,124.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:33:00
+2026-08-24 09:35:00,POST,/conversations/451abd81-f1d6-4ed6-97f5-e837d70820fe/messages,200,186.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:35:00
+2026-08-24 09:35:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 09:35:00
+2026-08-24 09:40:00,GET,/me,200,21.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:40:00
+2026-08-24 09:40:00,GET,/health,200,9.0,,python-httpx/0.28.1,2026-08-24 09:40:00
+2026-08-24 09:42:00,POST,/conversations/7f26144b-9828-4fcd-99a5-4a7bb1fee08f/messages,200,89.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:42:00
+2026-08-24 09:43:00,GET,/me/conversations,200,86.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:43:00
+2026-08-24 09:45:00,GET,/health,200,4.0,,python-httpx/0.28.1,2026-08-24 09:45:00
+2026-08-24 09:46:00,GET,/conversations/13deef86-ab10-41d0-b646-e1f40a097c97/messages,500,348.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:46:00
+2026-08-24 09:50:00,GET,/conversations/b774eb52-48db-40af-b215-8370d269a9a5/messages,200,,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:50:00
+2026-08-24 09:50:00,GET,/health,200,5.0,,python-httpx/0.28.1,2026-08-24 09:50:00
+2026-08-24 09:50:00,GET,/conversations/b774eb52-48db-40af-b215-8370d269a9a5/messages,200,,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:50:00
+2026-08-24 09:54:00,GET,/conversations/58d5563d-ab2c-431e-a315-128862c33a4f/messages,200,130.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:54:00
+2026-08-24 09:55:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 09:55:00
+2026-08-24 09:57:00,GET,/me/conversations,200,31.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:57:00
+2026-08-24 09:59:00,GET,/me/conversations,200,87.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 09:59:00
+2026-08-24 10:00:00,GET,/health,200,9.0,,python-httpx/0.28.1,2026-08-24 10:00:00
+2026-08-24 10:03:00,GET,/conversations/c7a2ea20-b2f1-4c94-ae05-319acb5c7427/messages,200,65.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:03:00
+2026-08-24 10:05:00,GET,/health,200,3.0,,python-httpx/0.28.1,2026-08-24 10:05:00
+2026-08-24 10:06:00,POST,/conversations,200,94.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:06:00
+2026-08-24 10:10:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 10:10:00
+2026-08-24 10:12:00,GET,/conversations/8d116ece-1738-47d9-bd9c-172411e20b8f/messages,200,131.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:12:00
+2026-08-24 10:15:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 10:15:00
+2026-08-24 10:18:00,POST,/conversations,200,58.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:18:00
+2026-08-24 10:20:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 10:20:00
+2026-08-24 10:24:00,GET,/me,200,,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:24:00
+2026-08-24 10:25:00,GET,/health,200,3.0,,python-httpx/0.28.1,2026-08-24 10:25:00
+2026-08-24 10:27:00,GET,/conversations/7f1b103c-df15-42b0-aab4-77d26415479c/messages,200,91.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:27:00
+2026-08-24 10:28:00,GET,/conversations/8e81973e-0bec-47b0-b898-d190f9ebdacc/messages,500,152.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:28:00
+2026-08-24 10:28:00,GET,/conversations/8e81973e-0bec-47b0-b898-d190f9ebdacc/messages,500,152.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:28:00
+2026-08-24 10:30:00,GET,/me/conversations,200,78.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:30:00
+2026-08-24 10:30:00,GET,/health,200,4.0,,python-httpx/0.28.1,2026-08-24 10:30:00
+2026-08-24 10:35:00,GET,/conversations/13deef86-ab10-41d0-b646-e1f40a097c97/messages,404,82.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:35:00
+2026-08-24 10:35:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 10:35:00
+2026-08-24 10:39:00,GET,/conversations/7f150524-34b9-45df-9e77-69b10f4205b4/messages,200,98.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:39:00
+2026-08-24 10:40:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 10:40:00
+2026-08-24 10:44:00,GET,/conversations/ec66a787-95e7-41d1-b731-af10506bf2ef/messages,200,88.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:44:00
+2026-08-24 10:45:00,GET,/health,200,2.0,,python-httpx/0.28.1,2026-08-24 10:45:00
+2026-08-24 10:50:00,GET,/conversations/7e62aa0a-1df9-4d78-9c65-39382b0537e6/messages,200,16.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:50:00
+2026-08-24 10:50:00,GET,/conversations/7e62aa0a-1df9-4d78-9c65-39382b0537e6/messages,200,16.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:50:00
+2026-08-24 10:50:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 10:50:00
+2026-08-24 10:51:00,POST,/conversations/b774eb52-48db-40af-b215-8370d269a9a5/messages,200,78.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:51:00
+2026-08-24 10:55:00,GET,/health,200,5.0,,python-httpx/0.28.1,2026-08-24 10:55:00
+2026-08-24 10:56:00,GET,/me,200,65.0,3fa85f64-5717-4562-b3fc-2c963f66afa6,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 10:56:00
+2026-08-24 11:00:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 11:00:00
+2026-08-24 11:02:00,GET,/conversations/8d116ece-1738-47d9-bd9c-172411e20b8f/messages,200,74.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:02:00
+2026-08-24 11:05:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 11:05:00
+2026-08-24 11:07:00,GET,/conversations/ae97ba94-d0ed-482f-8f6d-05584ef8aa38/messages,200,107.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:07:00
+2026-08-24 11:07:00,GET,/conversations/ae97ba94-d0ed-482f-8f6d-05584ef8aa38/messages,200,107.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:07:00
+2026-08-24 11:10:00,GET,/health,200,5.0,,python-httpx/0.28.1,2026-08-24 11:10:00
+2026-08-24 11:13:00,GET,/me/conversations,200,51.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:13:00
+2026-08-24 11:15:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 11:15:00
+2026-08-24 11:19:00,GET,/conversations/3f98e277-4cbd-47ad-9c90-a9587403e430/messages,200,118.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:19:00
+2026-08-24 11:20:00,GET,/health,200,4.0,,python-httpx/0.28.1,2026-08-24 11:20:00
+2026-08-24 11:21:00,GET,/conversations/c7a2ea20-b2f1-4c94-ae05-319acb5c7427/messages,200,,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:21:00
+2026-08-24 11:25:00,GET,/health,200,3.0,,python-httpx/0.28.1,2026-08-24 11:25:00
+2026-08-24 11:27:00,GET,/me/conversations,200,64.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:27:00
+2026-08-24 11:30:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 11:30:00
+2026-08-24 11:33:00,GET,/conversations/57124242-5051-41cc-917f-9acae01f5057/messages,200,85.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:33:00
+2026-08-24 11:35:00,GET,/health,200,3.0,,python-httpx/0.28.1,2026-08-24 11:35:00
+2026-08-24 11:38:00,POST,/conversations,500,500.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:38:00
+2026-08-24 11:39:00,GET,/conversations/7f150524-34b9-45df-9e77-69b10f4205b4/messages,200,87.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:39:00
+2026-08-24 11:40:00,GET,/health,200,5.0,,python-httpx/0.28.1,2026-08-24 11:40:00
+2026-08-24 11:45:00,GET,/conversations/b774eb52-48db-40af-b215-8370d269a9a5/messages,200,87.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:45:00
+2026-08-24 11:45:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 11:45:00
+2026-08-24 11:49:00,GET,/me,200,45.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:49:00
+2026-08-24 11:50:00,GET,/health,200,9.0,,python-httpx/0.28.1,2026-08-24 11:50:00
+2026-08-24 11:54:00,POST,/conversations/4f426dcb-b394-4b36-bb2d-420f0f88080b/messages,200,192.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 11:54:00
+2026-08-24 11:55:00,GET,/health,200,5.0,,python-httpx/0.28.1,2026-08-24 11:55:00
+2026-08-24 12:00:00,GET,/conversations/ae97ba94-d0ed-482f-8f6d-05584ef8aa38/messages,200,34.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:00:00
+2026-08-24 12:00:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 12:00:00
+2026-08-24 12:03:00,GET,/conversations/6b0d549b-6f03-475a-9600-a35a099950d8/messages,200,62.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:03:00
+2026-08-24 12:04:00,GET,/conversations/57124242-5051-41cc-917f-9acae01f5057/messages,200,73.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:04:00
+2026-08-24 12:05:00,GET,/health,200,8.0,,python-httpx/0.28.1,2026-08-24 12:05:00
+2026-08-24 12:10:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 12:10:00
+2026-08-24 12:10:00,GET,/conversations/907a70c3-1012-4037-b64c-e4228c38fb29/messages,200,119.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:10:00
+2026-08-24 12:14:00,POST,/conversations/5790f82e-c1d3-4cff-aa3a-f4d46b0a18e8/messages,200,156.0,,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:14:00
+2026-08-24 12:15:00,POST,/conversations/9be4bcfc-49b6-4a08-b2e6-cc3ababced20/messages,200,203.0,7c1e9b02-44da-4f0e-9a31-8ad5c6f21b90,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:15:00
+2026-08-24 12:15:00,GET,/health,200,6.0,,python-httpx/0.28.1,2026-08-24 12:15:00
+2026-08-24 12:20:00,GET,/health,200,2.0,,python-httpx/0.28.1,2026-08-24 12:20:00
+2026-08-24 12:21:00,POST,/conversations/9be4bcfc-49b6-4a08-b2e6-cc3ababced20/messages,200,143.0,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:21:00
+2026-08-24 12:23:00,POST,/conversations/10a3d6b2-aa05-411a-b271-5945795e8229/messages,200,,5e90694f-0aca-43e6-b6dd-68daa289b104,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:23:00
+2026-08-24 12:25:00,GET,/health,200,7.0,,python-httpx/0.28.1,2026-08-24 12:25:00
+2026-08-24 12:29:00,GET,/me/conversations,404,59.0,a92f4d18-6b77-4c55-9e02-1f3b7c8d4e6a,Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0,2026-08-24 12:29:00
