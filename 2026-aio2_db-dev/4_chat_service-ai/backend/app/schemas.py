@@ -94,3 +94,12 @@ class ProfileOut(BaseModel):
 
 class ProfileUpdate(BaseModel):
     username: str = Field(min_length=2, max_length=30)
+
+
+class ChatRequest(BaseModel):
+    content: str
+    # 화면에서 고른 값. 안 보내면 None 이고, gemini_client 가 기본값으로 바꾼다.
+    # 주의: 여기에 기본 문자열을 적지 않는다. 적으면 선택지 목록이 두 파일에 나뉘어
+    #      한쪽만 고쳤을 때 어긋난다. 선택지는 gemini_client.py 한 곳에만 둔다.
+    tone: str | None = None
+    length: str | None = None

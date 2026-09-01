@@ -6,12 +6,15 @@
 
 from fastapi import FastAPI
 
-from app.routers import auth, conversations, me
+from app.routers import auth, conversations, me, chat
 
 app = FastAPI(title="chat-service", version="0.1.0")
 
-app.include_router(auth.router)
+app = FastAPI(title="chat-service")
 app.include_router(conversations.router)
+app.include_router(chat.router)
+app.include_router(chat.options_router)
+app.include_router(auth.router)
 app.include_router(me.router)
 
 

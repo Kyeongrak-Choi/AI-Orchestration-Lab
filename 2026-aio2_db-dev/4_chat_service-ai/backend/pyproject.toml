@@ -11,4 +11,6 @@ dependencies = [
     "supabase>=2.31.0",
     "uvicorn[standard]>=0.50.2",
     "redis>=8.1.0",
+    "google-genai>=2.21.0",
+    "ipykernel>=7.3.0",
 ]

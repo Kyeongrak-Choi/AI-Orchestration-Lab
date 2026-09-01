@@ -194,6 +194,6 @@ def list_messages(conversation_id: UUID):
         .execute()
     )
     cache_set(
-        cache_key, json.dumps(result.data, default=str), ex=MESSAGES_CACHE_TTL_SECONDS
+        cache_key, json.dumps(result.data, default=str), MESSAGES_CACHE_TTL_SECONDS
     )
     return result.data
