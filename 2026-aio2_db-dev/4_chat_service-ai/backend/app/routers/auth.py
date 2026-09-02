@@ -10,9 +10,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def signup(payload: SignupRequest):
     client = get_anon_client()
     try:
+        print("email:", payload.email, "password:", payload.password)
         result = client.auth.sign_up(
-            {"email": payload.email,
-             "password": payload.password}
+            {"email": payload.email, "password": payload.password}
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -1,15 +1,40 @@
+"""18일차 완성본 — 사용자 상태와 개인화 UX.
+
+오늘의 주제는 로그인 기능이 아니다. 백엔드의 로그인은 13일차에 이미 만들었다.
+오늘 배우는 것은 **사용자 상태가 바뀔 때 화면이 어떻게 반응해야 하는가** 다.
+
+    상태             조건                     화면
+    -------------   ----------------------   --------------------------------
+    비로그인         토큰 없음                 로그인 폼. 서비스가 뭔지도 알려줌
+    로그인 + 빈 목록  연습 기록 0건             첫 면접을 시작하라는 안내
+    로그인 + 선택 안함 목록은 있고 고르지 않음    무엇을 고르면 되는지
+    로그인 + 내용 없음 대화는 있고 메시지 0건     예시 질문
+    기본             주고받은 내용 있음         대화
+    세션 만료         토큰이 60분을 넘김         왜 풀렸는지 + 다시 로그인
+
+마지막 줄이 오늘 새로 생기는 상태다. 그리고 가장 많이 빠뜨리는 것이다.
+"""
+
 import streamlit as st
 
-from common import SERVICE_NAME, ApiError, api, conversation_label
+from common import (
+    SERVICE_NAME,
+    ApiError,
+    SessionExpired,
+    api,
+    auth_headers,
+    conversation_label,
+)
 
 st.set_page_config(page_title=SERVICE_NAME, layout="centered")
 
-# 화면을 다시 그려도 유지해야 하는 값들. 여기서 한 번에 초기화한다.
-st.session_state.setdefault("user_id", "")
+st.session_state.setdefault("access_token", None)
+st.session_state.setdefault("user_email", None)
 st.session_state.setdefault("conversation_id", None)
-st.session_state.setdefault("tone", "친절하게")
-st.session_state.setdefault("length", "보통")
 st.session_state.setdefault("pending_question", None)
+# 세션이 풀린 이유를 다음 실행에서 보여주려고 남겨둔다.
+# 토큰만 지우고 끝내면 사용자는 자기가 왜 로그아웃됐는지 모른다.
+st.session_state.setdefault("expired_notice", None)
 
 EXAMPLE_QUESTIONS = [
     "면접을 시작해 주세요.",
@@ -18,42 +43,84 @@ EXAMPLE_QUESTIONS = [
 ]
 
 
+def sign_out(notice: str | None = None) -> None:
+    """로그인 관련 상태를 한 번에 지운다.
+
+    지울 것을 빠뜨리면 다음 사용자에게 앞사람의 대화가 잠깐 보인다.
+    그래서 로그아웃과 세션 만료가 같은 함수를 쓰게 해둔다.
+    """
+    st.session_state.access_token = None
+    st.session_state.user_email = None
+    st.session_state.conversation_id = None
+    st.session_state.pending_question = None
+    st.session_state.expired_notice = notice
+    st.rerun()
+
+
 @st.cache_data(ttl=300)
 def load_options() -> dict:
-    """선택지는 백엔드에서 받아온다.
-
-    화면에 목록을 직접 적어두면 백엔드의 표와 두 곳에서 관리하게 된다.
-    한쪽에 톤을 추가하고 다른 쪽을 잊으면, 버튼은 있는데 아무 효과가 없다.
-    """
     return api("GET", "/chat/options")
 
 
-def render_sidebar(options: dict) -> None:
-    """왼쪽: 내가 누구인지 + 어떤 면접을 볼지 고르는 곳."""
-    with st.sidebar:
-        st.subheader("연습 기록")
+def render_login() -> None:
+    """비로그인 상태의 화면 전체."""
+    if st.session_state.expired_notice:
+        st.warning(st.session_state.expired_notice)
 
-        # 주의: 로그인은 18일차에 붙인다. 그때까지는 user_id 를 직접 입력해서 대신한다.
-        st.session_state.user_id = st.text_input(
-            "user_id (profiles.id)", st.session_state.user_id
+    st.write("직무를 정하고 면접 질문에 답하며 연습합니다. 기록은 계정에 저장됩니다.")
+
+    email = st.text_input("이메일", placeholder="you@example.com")
+    password = st.text_input("비밀번호", type="password")
+
+    login_column, signup_column = st.columns(2)
+    action = None
+    if login_column.button("로그인", use_container_width=True):
+        action = "login"
+    if signup_column.button("회원가입", use_container_width=True):
+        action = "signup"
+
+    if not action:
+        return
+    if not email or not password:
+        st.error("이메일과 비밀번호를 모두 입력하세요.")
+        return
+
+    try:
+        print(f"/auth/{action}")
+        result = api(
+            "POST",
+            f"/auth/{action}",
+            json={"email": email, "password": password},
         )
+    except ApiError as error:
+        st.error(str(error))
+        return
 
-        if not st.session_state.user_id:
-            st.caption("user_id 를 입력하면 연습 기록이 나타납니다.")
-            return
+    if not result.get("access_token"):
+        # 가입은 됐는데 토큰이 없는 경우가 있다 (이메일 확인이 켜져 있을 때).
+        st.error("가입은 되었지만 바로 로그인되지 않았습니다. 강사에게 알리세요.")
+        return
 
-        try:
-            conversations = api(
-                "GET", "/conversations", params={"user_id": st.session_state.user_id}
-            )
-        except ApiError as error:
-            st.error(str(error))
-            return
+    st.session_state.access_token = result["access_token"]
+    st.session_state.user_email = result["email"]
+    st.session_state.expired_notice = None
+    st.rerun()
+
+
+# 시그니처에 conversations를 추가합니다.(18일차)
+def render_sidebar(options: dict, conversations: list) -> None:
+    with st.sidebar:
+        # 로그인이 된 상태 - 세션에 유저 이메일이 있음.
+        st.caption(st.session_state.user_email)
+        if st.button("로그아웃", use_container_width=True):
+            sign_out()
+
+        st.divider()
+        st.subheader("연습 기록")
 
         if conversations:
             labels = {c["id"]: conversation_label(c) for c in conversations}
             ids = list(labels)
-            # 주의: index 와 key 를 지정하지 않으면 화면을 다시 그릴 때 선택이 풀린다.
             current = st.session_state.conversation_id
             selected = st.selectbox(
                 "지난 연습",
@@ -63,88 +130,67 @@ def render_sidebar(options: dict) -> None:
                 key="conversation_select",
             )
             st.session_state.conversation_id = selected
+
+            new_title = st.text_input("새 이름", key="rename_input")
+            rename_column, delete_column = st.columns(2)
+            if (
+                rename_column.button("이름 변경", use_container_width=True)
+                and new_title
+            ):
+                api(
+                    "PATCH",
+                    f"/me/conversations/{selected}",
+                    json={"title": new_title},
+                    headers=auth_headers(),
+                )
+                st.rerun()
+            if delete_column.button("삭제", use_container_width=True):
+                api("DELETE", f"/me/conversations/{selected}", headers=auth_headers())
+                st.session_state.conversation_id = None
+                st.rerun()
         else:
             st.caption("아직 연습 기록이 없습니다.")
 
         st.divider()
         job_title = st.text_input("직무", placeholder="예: 백엔드 개발자")
         if st.button("새 면접 시작", use_container_width=True) and job_title:
-            try:
-                created = api(
-                    "POST",
-                    "/conversations",
-                    json={"user_id": st.session_state.user_id, "title": job_title},
-                )
-            except ApiError as error:
-                st.error(str(error))
-                return
+            # 주의: user_id 를 보내지 않는다. 서버가 토큰에서 꺼내 쓴다.
+            created = api(
+                "POST",
+                "/me/conversations",
+                json={"title": job_title},
+                headers=auth_headers(),
+            )
             st.session_state.conversation_id = created["id"]
             st.rerun()
 
-        # 면접관 설정 영역
         st.divider()
         st.subheader("면접관 설정")
-        # 이 두 값이 곧 프롬프트의 두 문장이 된다.
         st.radio("말투", options["tones"], key="tone", horizontal=True)
         st.radio("답변 길이", options["lengths"], key="length", horizontal=True)
-        st.caption(
-            "고른 값은 다음 질문부터 적용됩니다. 이미 받은 답변은 바뀌지 않습니다."
-        )
+        st.caption("고른 값은 다음 질문부터 적용됩니다.")
 
 
 def render_empty(message: str, hint: str) -> None:
-    """빈 화면은 "없다"가 아니라 "다음에 무엇을 하면 되는지"를 말해야 한다."""
     st.info(message)
     st.caption(hint)
 
 
-def render_conversation(conversation_id: str) -> None:
-    """가운데: 주고받은 내용과 입력칸."""
-    try:
-        messages = api("GET", f"/conversations/{conversation_id}/messages")
-    except ApiError as error:
-        st.error(str(error))
-        return
-
-    if not messages:
-        render_empty(
-            "아직 주고받은 내용이 없습니다.",
-            "아래 입력칸에 첫 답변을 적어보세요. 오늘은 저장만 되고, 면접관의 질문은 17일차에 붙입니다.",
+def ask(conversation_id: str, question: str) -> None:
+    with st.spinner("면접관이 답변을 준비하는 중..."):
+        api(
+            "POST",
+            f"/conversations/{conversation_id}/chat",
+            json={
+                "content": question,
+                "tone": st.session_state.tone,
+                "length": st.session_state.length,
+            },
         )
-        render_examples(conversation_id)
-
-    for message in messages:
-        with st.chat_message(message["role"]):
-            st.write(message["content"])
-
-    if messages and messages[-1]["role"] == "assistant":
-        render_follow_ups(messages[-1]["content"])
-
-    if answer := st.chat_input("답변을 입력하세요"):
-        # try:
-        #     api(
-        #         "POST",
-        #         f"/conversations/{conversation_id}/messages",
-        #         json={"role": "user", "content": answer},
-        #     )
-        # except ApiError as error:
-        #     st.error(str(error))
-        #     return
-        # st.rerun()
-        ask(conversation_id, answer)
-
-    # 버튼이 담아둔 질문이 있으면 먼저 보낸다.
-    if st.session_state.pending_question:
-        question = st.session_state.pending_question
-        st.session_state.pending_question = None
-        ask(conversation_id, question)
+    st.rerun()
 
 
-def render_examples(conversation_id: str) -> None:
-    """무엇을 물어야 할지 모르는 사람을 위한 출발점.
-
-    빈 입력칸만 놓아두면 대부분 아무것도 입력하지 않고 나간다.
-    """
+def render_examples() -> None:
     st.caption("이렇게 시작해 보세요")
     columns = st.columns(len(EXAMPLE_QUESTIONS))
     for column, question in zip(columns, EXAMPLE_QUESTIONS):
@@ -153,31 +199,7 @@ def render_examples(conversation_id: str) -> None:
             st.rerun()
 
 
-def ask(conversation_id: str, question: str) -> None:
-    """질문을 보내고 답을 받는다. 실패하면 화면에 이유를 남긴다."""
-    try:
-        with st.spinner("면접관이 답변을 준비하는 중..."):
-            api(
-                "POST",
-                f"/conversations/{conversation_id}/chat",
-                json={
-                    "content": question,
-                    "tone": st.session_state.tone,
-                    "length": st.session_state.length,
-                },
-            )
-    except ApiError as error:
-        st.error(str(error))
-        return
-    st.rerun()
-
-
 def render_follow_ups(last_answer: str) -> None:
-    """직전 답변을 두고 이어서 할 수 있는 행동.
-
-    주의: 오늘은 모델이 이전 대화를 기억하지 못한다(19일차 주제).
-    그래서 직전 답변을 질문 안에 넣어서 보낸다. 맥락은 결국 프롬프트로 들어간다.
-    """
     st.caption("이어서")
     actions = {
         "더 자세히": f"방금 한 이 말을 예시를 들어 더 자세히 설명해 주세요.\n\n{last_answer}",
@@ -191,36 +213,73 @@ def render_follow_ups(last_answer: str) -> None:
             st.rerun()
 
 
-try:
+def render_conversation(conversation_id: str) -> None:
+    messages = api("GET", f"/conversations/{conversation_id}/messages")
+
+    if not messages:
+        render_empty(
+            "아직 주고받은 내용이 없습니다.",
+            "아래 예시를 누르거나 직접 입력해서 면접을 시작하세요.",
+        )
+        render_examples()
+
+    for message in messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    if messages and messages[-1]["role"] == "assistant":
+        render_follow_ups(messages[-1]["content"])
+
+    if st.session_state.pending_question:
+        question = st.session_state.pending_question
+        st.session_state.pending_question = None
+        ask(conversation_id, question)
+
+    if answer := st.chat_input("답변을 입력하세요"):
+        ask(conversation_id, answer)
+
+
+def render_signed_in() -> None:
+    """로그인한 뒤의 화면 전체.
+
+    이 안에서 나는 SessionExpired 는 아래 main 이 한 번에 받는다.
+    호출마다 try 를 쓰면 스무 군데가 되고, 한 곳만 빠뜨려도
+    거기서 화면이 비어 보인다.
+    """
     options = load_options()
-except ApiError as error:
-    st.title(SERVICE_NAME)
-    st.error(str(error))
-    st.stop()
+    st.session_state.setdefault("tone", options["default_tone"])
+    st.session_state.setdefault("length", options["default_length"])
 
-# 라디오 버튼의 초기값. 백엔드가 알려준 기본값을 쓴다.
-st.session_state.setdefault("tone", options["default_tone"])
-st.session_state.setdefault("length", options["default_length"])
+    conversations = api("GET", "/me/conversations", headers=auth_headers())
+    render_sidebar(options, conversations)
 
+    st.caption(f"말투 {st.session_state.tone} · 길이 {st.session_state.length}")
 
-render_sidebar(options)
+    if not conversations:
+        render_empty(
+            "아직 연습 기록이 없습니다.",
+            "왼쪽에서 지원할 직무를 적고 `새 면접 시작` 을 누르세요.",
+        )
+    # 방어 가지. selectbox 가 첫 항목을 자동으로 고르므로 평소에는 닿지 않는다.
+    # 목록이 있는데 선택이 비면 render_conversation(None) 이 되어 422 가 난다.
+    elif not st.session_state.conversation_id:
+        render_empty(
+            "연습할 면접을 고르세요.",
+            "왼쪽 `지난 연습` 에서 하나를 선택하면 됩니다.",
+        )
+    else:
+        render_conversation(st.session_state.conversation_id)
+
 
 st.title(SERVICE_NAME)
-st.caption("직무를 정하고 면접 질문에 답하며 연습합니다. 오늘은 화면만 만듭니다.")
 
-if not st.session_state.user_id:
-    render_empty(
-        "왼쪽에 user_id 를 입력하세요.",
-        "Supabase SQL Editor 에서 `select id, username from profiles;` 로 확인할 수 있습니다.",
-    )
-elif not st.session_state.conversation_id:
-    render_empty(
-        "연습할 면접을 고르거나 새로 시작하세요.",
-        "왼쪽에서 직무를 적고 `새 면접 시작` 을 누르면 됩니다.",
-    )
-else:
-    render_conversation(st.session_state.conversation_id)
-
-
-# st.title(SERVICE_NAME)
-# st.caption(f"말투 {st.session_state.tone} · 길이 {st.session_state.length}")
+try:
+    if st.session_state.access_token:
+        render_signed_in()
+    else:
+        render_login()
+except SessionExpired as error:
+    # 토큰을 지우고 로그인 화면으로 돌린다. 이유는 다음 실행에서 보여준다.
+    sign_out(str(error))
+except ApiError as error:
+    st.error(str(error))
