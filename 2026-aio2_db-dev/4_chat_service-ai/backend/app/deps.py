@@ -54,7 +54,7 @@ def get_current_user(
     cache_set(
         cache_key,
         json.dumps({"id": current_user.id, "email": current_user.email}),
-        ex=SESSION_CACHE_TTL_SECONDS,
+        SESSION_CACHE_TTL_SECONDS,
     )
 
     return current_user
