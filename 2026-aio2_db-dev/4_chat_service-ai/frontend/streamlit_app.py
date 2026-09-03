@@ -213,8 +213,40 @@ def render_follow_ups(last_answer: str) -> None:
             st.rerun()
 
 
-def render_conversation(conversation_id: str) -> None:
+def _remembered_count(messages: list, max_history: int) -> int:
+    """모델에게 실제로 갈 메시지 수. 백엔드 _build_history 와 같은 순서로 센다."""
+    for index in range(len(messages) - 1, -1, -1):
+        if messages[index]["role"] == "system":
+            messages = messages[index + 1 :]
+            break
+    usable = [m for m in messages if m["role"] in ("user", "assistant")]
+    return min(len(usable), max_history)
+
+
+def render_context_controls(
+    conversation_id: str, messages: list, max_history: int
+) -> None:
+    """면접관이 무엇을 기억하는지 보여주고, 끊을 수 있게 한다.
+
+    사용자는 모델이 무엇을 참고하는지 볼 수 없다. 화면이 말해주지 않으면
+    "왜 아까 한 말을 기억 못하지" 또는 반대로 "왜 지운 얘기를 계속 하지"가 된다.
+    """
+    remembered = _remembered_count(messages, max_history)
+    reset_column, info_column = st.columns([1, 3])
+    if reset_column.button("맥락 초기화", use_container_width=True):
+        api("POST", f"/conversations/{conversation_id}/reset-context")
+        st.rerun()
+    info_column.caption(
+        f"면접관은 지금 이 대화의 최근 {remembered}개를 기억합니다 "
+        f"(최대 {max_history}개). 초기화해도 기록은 남습니다."
+    )
+
+
+def render_conversation(conversation_id: str, max_history: int) -> None:
     messages = api("GET", f"/conversations/{conversation_id}/messages")
+
+    # if messages:
+    #     render_context_controls(conversation_id, messages, max_history)
 
     if not messages:
         render_empty(
@@ -224,8 +256,16 @@ def render_conversation(conversation_id: str) -> None:
         render_examples()
 
     for message in messages:
+        if message["role"] == "system":
+            # 맥락을 끊은 지점. 말풍선이 아니라 구분선으로 그린다.
+            # 누가 한 말이 아니라 "여기서 끊겼다"는 표시이기 때문이다.
+            st.divider()
+            st.caption(message["content"])
+            continue
         with st.chat_message(message["role"]):
             st.write(message["content"])
+
+    render_context_controls(conversation_id, messages, max_history=10)
 
     if messages and messages[-1]["role"] == "assistant":
         render_follow_ups(messages[-1]["content"])
@@ -268,7 +308,9 @@ def render_signed_in() -> None:
             "왼쪽 `지난 연습` 에서 하나를 선택하면 됩니다.",
         )
     else:
-        render_conversation(st.session_state.conversation_id)
+        render_conversation(
+            st.session_state.conversation_id, options["max_history_messages"]
+        )
 
 
 st.title(SERVICE_NAME)
