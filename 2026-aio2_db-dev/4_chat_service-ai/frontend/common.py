@@ -5,11 +5,19 @@
 """
 
 import json
+import os
 
 import httpx
 import streamlit as st
 
-BACKEND_URL = "http://127.0.0.1:8000"
+try:
+    _backend_url_secret = st.secrets.get("BACKEND_URL")
+except Exception:
+    _backend_url_secret = None
+
+BACKEND_URL = _backend_url_secret or os.environ.get(
+    "BACKEND_URL", "http://127.0.0.1:8000"
+)
 
 # httpx 기본 타임아웃은 5초다. 배포한 서버는 깨어나는 데 그보다 오래 걸리기도 한다.
 HTTP_TIMEOUT = 60
@@ -82,9 +90,7 @@ def api(method: str, path: str, **kwargs):
     return response.json() if response.content else None
 
 
-def stream_answer(path: str,
-                  payload: dict | None = None,
-                  headers: dict | None = None):
+def stream_answer(path: str, payload: dict | None = None, headers: dict | None = None):
     """SSE 응답을 글자 조각으로 하나씩 내어준다.
 
     api() 와 나눠 둔 이유는 반환하는 것이 다르기 때문이다.
@@ -95,11 +101,11 @@ def stream_answer(path: str,
     """
     try:
         with httpx.stream(
-            "POST", 
-            f"{BACKEND_URL}{path}", 
-            json=payload or {}, 
+            "POST",
+            f"{BACKEND_URL}{path}",
+            json=payload or {},
             headers=headers,
-            timeout=HTTP_TIMEOUT
+            timeout=HTTP_TIMEOUT,
         ) as response:
             if response.status_code == 401:
                 response.read()
@@ -108,7 +114,9 @@ def stream_answer(path: str,
                 )
             if response.status_code >= 400:
                 response.read()
-                raise ApiError(f"요청이 실패했습니다 (상태 코드 {response.status_code}).")
+                raise ApiError(
+                    f"요청이 실패했습니다 (상태 코드 {response.status_code})."
+                )
 
             for line in response.iter_lines():
                 if not line.startswith("data: "):
