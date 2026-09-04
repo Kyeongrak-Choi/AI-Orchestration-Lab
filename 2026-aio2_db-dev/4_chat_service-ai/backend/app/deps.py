@@ -1,6 +1,7 @@
 import hashlib
 import json
 from dataclasses import dataclass
+from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -32,23 +33,16 @@ def get_current_user(
     cached = cache_get(cache_key)
     if cached:
         data = json.loads(cached)
-        return CurrentUser(
-            id=data["id"], 
-            email=data["email"], 
-            token=token)
+        return CurrentUser(id=data["id"], email=data["email"], token=token)
 
     client = get_anon_client()
     try:
         result = client.auth.get_user(token)
     except Exception:
-        raise HTTPException(
-            status_code=401, 
-            detail="유효하지 않은 토큰입니다")
+        raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다")
 
     current_user = CurrentUser(
-        id=str(result.user.id),
-        email=result.user.email, 
-        token=token
+        id=str(result.user.id), email=result.user.email, token=token
     )
 
     cache_set(
@@ -58,3 +52,27 @@ def get_current_user(
     )
 
     return current_user
+
+
+def require_own_conversation(
+    conversation_id: UUID, current_user: CurrentUser = Depends(get_current_user)
+) -> UUID:
+    """이 대화가 내 것인지 확인한다. 아니면 404.
+
+    18일차의 /me/conversations 와 같은 원리다. 우리가 소유자를 비교하지 않는다.
+    RLS 를 켠 클라이언트로 조회해서 0건이면 내 것이 아니다.
+
+    없는 대화와 남의 대화를 구분하지 않고 똑같이 404 로 답한다.
+    구분해서 알려주면 "그 대화는 존재한다"는 정보를 흘리게 된다.
+    """
+    client = get_anon_client()
+    client.postgrest.auth(current_user.token)
+    owned = (
+        client.table("conversations")
+        .select("id")
+        .eq("id", str(conversation_id))
+        .execute()
+    )
+    if not owned.data:
+        raise HTTPException(status_code=404, detail="conversation not found")
+    return conversation_id

@@ -7,14 +7,14 @@ POST     /conversations/{id}/messages          메시지 저장             201
 GET      /conversations/{id}/messages          메시지 목록             200
 """
 
-import json
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.cache import cache_delete, cache_get, cache_set
+from app.cache import cache_delete
 from app.db import supabase
-from app.schemas import ConversationCreate, ConversationOut, MessageCreate, MessageOut
+from app.deps import require_own_conversation
+from app.schemas import MessageCreate, MessageOut
 
 # TODO 0. app.schemas 에서 ConversationCreate, ConversationOut,
 #         MessageCreate, MessageOut 을 가져온다
@@ -27,41 +27,37 @@ MESSAGES_CACHE_TTL_SECONDS = 300
 def _messages_cache_key(conversation_id: UUID) -> str:
     return f"messages:{conversation_id}"
 
+    # ── 실습 6 ────────────────────────────────────────────────────────
+    # TODO 1. POST "" — 대화 생성
+    #   · insert 전에 users 에 그 user_id 가 있는지 확인한다.
+    #     DB의 외래키도 막아주지만 그대로 두면 500 이 난다. 먼저 확인해 404 로 알리는 편이 친절하다.
+    #   · 없으면 404 "사용자를 찾을 수 없습니다"
 
-# ── 실습 6 ────────────────────────────────────────────────────────
-# TODO 1. POST "" — 대화 생성
-#   · insert 전에 users 에 그 user_id 가 있는지 확인한다.
-#     DB의 외래키도 막아주지만 그대로 두면 500 이 난다. 먼저 확인해 404 로 알리는 편이 친절하다.
-#   · 없으면 404 "사용자를 찾을 수 없습니다"
+    # @router.post("", response_model=ConversationOut, status_code=201)
+    # def create_conversation(conv_info: ConversationCreate):
+    #     user = (
+    #         supabase.table("profiles")
+    #         .select("id")
+    #         .eq("id", str(conv_info.user_id))
+    #         .execute()
+    #     )
+    #     if not user.data:
+    #         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
 
+    #     result = (
+    #         supabase.table("conversations")
+    #         .insert({"user_id": str(conv_info.user_id), "title": conv_info.title})
+    #         .execute()
+    #     )
+    #     return result.data[0]
 
-@router.post("", response_model=ConversationOut, status_code=201)
-def create_conversation(conv_info: ConversationCreate):
-    user = (
-        supabase.table("profiles")
-        .select("id")
-        .eq("id", str(conv_info.user_id))
-        .execute()
-    )
-    if not user.data:
-        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다")
+    # TODO 2. GET "" — 사용자별 대화 목록
+    #   · user_id 는 주소 뒤 ?user_id=... 로 온다. 함수 인자에 그냥 적으면 된다.
+    #   · 기본값을 주지 않으면 필수가 되고, 빠뜨리면 FastAPI 가 422 로 막는다.
+    #   · 최신순 정렬
 
-    result = (
-        supabase.table("conversations")
-        .insert({"user_id": str(conv_info.user_id), "title": conv_info.title})
-        .execute()
-    )
-    return result.data[0]
-
-
-# TODO 2. GET "" — 사용자별 대화 목록
-#   · user_id 는 주소 뒤 ?user_id=... 로 온다. 함수 인자에 그냥 적으면 된다.
-#   · 기본값을 주지 않으면 필수가 되고, 빠뜨리면 FastAPI 가 422 로 막는다.
-#   · 최신순 정렬
-
-
-@router.get("", response_model=list[ConversationOut])
-def list_conversations(user_id: UUID):
+    # @router.get("", response_model=list[ConversationOut])
+    # def list_conversations(user_id: UUID):
     result = (
         supabase.table("conversations")
         .select("*")
@@ -81,7 +77,7 @@ def list_conversations(user_id: UUID):
 #   · 대화가 없으면 404 "대화를 찾을 수 없습니다"
 
 
-@router.post("/{conversation_id}/messages", response_model=MessageOut, status_code=201)
+# @router.post("/{conversation_id}/messages", response_model=MessageOut, status_code=201)
 def create_message(conversation_id: UUID, payload: MessageCreate):
     conversation = (
         supabase.table("conversations")
@@ -133,67 +129,83 @@ def create_message(conversation_id: UUID, payload: MessageCreate):
 #     return result.data
 
 
-# 연습문제1. 대화 제목 수정
-@router.patch("/{conv_id}", response_model=ConversationOut)
-def update_title(conv_id: UUID, conv_info: ConversationCreate):
-    result = (
-        supabase.table("conversations")
-        .update({"title": conv_info.title})
-        .eq("id", str(conv_id))
-        .execute()
-    )
-    if not result.data:
-        raise HTTPException(status_code=404, detail="Not found conversation")
-    return result.data[0]
+# # 연습문제1. 대화 제목 수정
+# @router.patch("/{conv_id}", response_model=ConversationOut)
+# def update_title(conv_id: UUID =Depends(require_own_conversation), conv_info: ConversationCreate):
+#     result = (
+#         supabase.table("conversations")
+#         .update({"title": conv_info.title})
+#         .eq("id", str(conv_id))
+#         .execute()
+#     )
+#     if not result.data:
+#         raise HTTPException(status_code=404, detail="Not found conversation")
+#     return result.data[0]
 
 
-# 연습문제 2. 대화 삭제
-@router.delete("/{conv_id}", status_code=204)
-def delete_user(id: UUID):
-    result = supabase.table("conversations").delete().eq("id", str(id)).execute()
-    if not result.data:
-        raise HTTPException(status_code=404, detail="Not found conversation")
+# # 연습문제 2. 대화 삭제
+# @router.delete("/{conv_id}", status_code=204)
+# def delete_conversation(conv_id: UUID =Depends(require_own_conversation)):
+#     result = supabase.table("conversations").delete().eq("id", str(conv_id)).execute()
+#     if not result.data:
+#         raise HTTPException(status_code=404, detail="Not found conversation")
 
 
 # 연습문제 4. 메시지 목록 페이지 나누기
 # @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
-# def list_messages(conversation_id: UUID, limit: int = 20, offset: int = 0):
-#     conversation = (
-#         supabase.table("conversations")
-#         .select("id")
-#         .eq("id", str(conversation_id))
-#         .execute()
-#     )
-#     if not conversation.data:
-#         raise HTTPException(status_code=404, detail="대화를 찾을 수 없습니다")
-
-#     result = (
-#         supabase.table("messages")
-#         .select("*")
-#         .eq("conversation_id", str(conversation_id))
-#         .order("created_at", desc=False)
-#         .range(offset, offset + limit - 1)
-#         .execute()
-#     )
-#     return result.data
-
-
-@router.get("/{conversation_id}/messages", response_model=list[MessageOut])
-def list_messages(conversation_id: UUID):
-    cache_key = _messages_cache_key(conversation_id)
-
-    cached = cache_get(cache_key)
-    if cached:
-        return json.loads(cached)
+def list_messages(
+    conversation_id: UUID = Depends(require_own_conversation),
+    limit: int = 20,
+    offset: int = 0,
+):
+    conversation = (
+        supabase.table("conversations")
+        .select("id")
+        .eq("id", str(conversation_id))
+        .execute()
+    )
+    if not conversation.data:
+        raise HTTPException(status_code=404, detail="대화를 찾을 수 없습니다")
 
     result = (
         supabase.table("messages")
         .select("*")
         .eq("conversation_id", str(conversation_id))
         .order("created_at", desc=False)
+        .range(offset, offset + limit - 1)
         .execute()
     )
-    cache_set(
-        cache_key, json.dumps(result.data, default=str), MESSAGES_CACHE_TTL_SECONDS
-    )
     return result.data
+
+
+# @router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+# def list_messages(conversation_id: UUID):
+#     cache_key = _messages_cache_key(conversation_id)
+
+#     cached = cache_get(cache_key)
+#     if cached:
+#         return json.loads(cached)
+
+#     result = (
+#         supabase.table("messages")
+#         .select("*")
+#         .eq("conversation_id", str(conversation_id))
+#         .order("created_at", desc=False)
+#         .execute()
+#     )
+#     cache_set(
+#         cache_key, json.dumps(result.data, default=str), MESSAGES_CACHE_TTL_SECONDS
+#     )
+#     return result.data
+
+
+@router.post("/{conversation_id}/messages", response_model=MessageOut)
+def post_message(
+    payload: MessageCreate, conversation_id: UUID = Depends(require_own_conversation)
+):
+    return create_message(conversation_id, payload)
+
+
+@router.get("/{conversation_id}/messages", response_model=list[MessageOut])
+def get_messages(conversation_id: UUID = Depends(require_own_conversation)):
+    return list_messages(conversation_id)

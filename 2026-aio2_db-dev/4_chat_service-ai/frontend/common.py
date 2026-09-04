@@ -4,6 +4,8 @@
 같은 상황인데 다르게 보이고, 나중에 고칠 때 빠뜨리는 곳이 생긴다.
 """
 
+import json
+
 import httpx
 import streamlit as st
 
@@ -78,6 +80,49 @@ def api(method: str, path: str, **kwargs):
         raise ApiError(f"요청이 실패했습니다 (상태 코드 {response.status_code}).")
 
     return response.json() if response.content else None
+
+
+def stream_answer(path: str,
+                  payload: dict | None = None,
+                  headers: dict | None = None):
+    """SSE 응답을 글자 조각으로 하나씩 내어준다.
+
+    api() 와 나눠 둔 이유는 반환하는 것이 다르기 때문이다.
+    api() 는 완성된 JSON 을 주고, 이 함수는 아직 안 끝난 응답을 조금씩 준다.
+
+    스트림이 시작된 뒤의 실패는 상태 코드로 알 수 없다. 헤더가 이미 나갔기 때문이다.
+    그래서 서버가 error 이벤트로 보내고, 여기서 ApiError 로 바꿔 올린다.
+    """
+    try:
+        with httpx.stream(
+            "POST", 
+            f"{BACKEND_URL}{path}", 
+            json=payload or {}, 
+            headers=headers,
+            timeout=HTTP_TIMEOUT
+        ) as response:
+            if response.status_code == 401:
+                response.read()
+                raise SessionExpired(
+                    "로그인이 만료되었습니다. 기록은 그대로 있으니 다시 로그인해 주세요."
+                )
+            if response.status_code >= 400:
+                response.read()
+                raise ApiError(f"요청이 실패했습니다 (상태 코드 {response.status_code}).")
+
+            for line in response.iter_lines():
+                if not line.startswith("data: "):
+                    continue
+                event = json.loads(line.removeprefix("data: "))
+                if "error" in event:
+                    raise ApiError(f"답변을 만들지 못했습니다. {event['error']}")
+                if event.get("done"):
+                    return
+                yield event["text"]
+    except httpx.ConnectError:
+        raise ApiError("백엔드 서버에 연결할 수 없습니다.")
+    except httpx.TimeoutException:
+        raise ApiError("응답이 너무 오래 걸려 중단했습니다. 다시 시도해 보세요.")
 
 
 def conversation_label(conversation: dict) -> str:

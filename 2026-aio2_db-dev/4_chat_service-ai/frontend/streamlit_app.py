@@ -1,18 +1,16 @@
-"""18일차 완성본 — 사용자 상태와 개인화 UX.
+"""20일차 완성본 — 실시간 응답과 피드백 UX.
 
-오늘의 주제는 로그인 기능이 아니다. 백엔드의 로그인은 13일차에 이미 만들었다.
-오늘 배우는 것은 **사용자 상태가 바뀔 때 화면이 어떻게 반응해야 하는가** 다.
+오늘은 사용자의 행동과 시스템의 상태를 1대1로 잇는다.
 
-    상태             조건                     화면
-    -------------   ----------------------   --------------------------------
-    비로그인         토큰 없음                 로그인 폼. 서비스가 뭔지도 알려줌
-    로그인 + 빈 목록  연습 기록 0건             첫 면접을 시작하라는 안내
-    로그인 + 선택 안함 목록은 있고 고르지 않음    무엇을 고르면 되는지
-    로그인 + 내용 없음 대화는 있고 메시지 0건     예시 질문
-    기본             주고받은 내용 있음         대화
-    세션 만료         토큰이 60분을 넘김         왜 풀렸는지 + 다시 로그인
+    사용자가 겪는 것        화면이 하는 일
+    --------------------   --------------------------------
+    답이 늦다               글자가 나오는 대로 흘려보낸다
+    답을 못 받았다           같은 질문으로 `다시 시도`
+    답이 마음에 안 든다       기존 답을 지우고 `다시 생성`
+    답이 좋았다/아쉬웠다      `도움됨` / `아쉬움` 을 남긴다
 
-마지막 줄이 오늘 새로 생기는 상태다. 그리고 가장 많이 빠뜨리는 것이다.
+`다시 시도`와 `다시 생성`은 다르다. 하나는 실패를 복구하는 것이고,
+다른 하나는 성공한 결과를 바꾸는 것이다.
 """
 
 import streamlit as st
@@ -24,6 +22,7 @@ from common import (
     api,
     auth_headers,
     conversation_label,
+    stream_answer,
 )
 
 st.set_page_config(page_title=SERVICE_NAME, layout="centered")
@@ -35,6 +34,8 @@ st.session_state.setdefault("pending_question", None)
 # 세션이 풀린 이유를 다음 실행에서 보여주려고 남겨둔다.
 # 토큰만 지우고 끝내면 사용자는 자기가 왜 로그아웃됐는지 모른다.
 st.session_state.setdefault("expired_notice", None)
+# 답을 못 받은 질문. `다시 시도` 버튼이 이것을 쓴다.
+st.session_state.setdefault("failed_question", None)
 
 EXAMPLE_QUESTIONS = [
     "면접을 시작해 주세요.",
@@ -53,6 +54,7 @@ def sign_out(notice: str | None = None) -> None:
     st.session_state.user_email = None
     st.session_state.conversation_id = None
     st.session_state.pending_question = None
+    st.session_state.failed_question = None
     st.session_state.expired_notice = notice
     st.rerun()
 
@@ -86,10 +88,10 @@ def render_login() -> None:
         return
 
     try:
-        print(f"/auth/{action}")
         result = api(
             "POST",
             f"/auth/{action}",
+            headers=auth_headers(),
             json={"email": email, "password": password},
         )
     except ApiError as error:
@@ -107,10 +109,8 @@ def render_login() -> None:
     st.rerun()
 
 
-# 시그니처에 conversations를 추가합니다.(18일차)
 def render_sidebar(options: dict, conversations: list) -> None:
     with st.sidebar:
-        # 로그인이 된 상태 - 세션에 유저 이메일이 있음.
         st.caption(st.session_state.user_email)
         if st.button("로그아웃", use_container_width=True):
             sign_out()
@@ -177,16 +177,63 @@ def render_empty(message: str, hint: str) -> None:
 
 
 def ask(conversation_id: str, question: str) -> None:
-    with st.spinner("면접관이 답변을 준비하는 중..."):
-        api(
-            "POST",
-            f"/conversations/{conversation_id}/chat",
-            json={
-                "content": question,
-                "tone": st.session_state.tone,
-                "length": st.session_state.length,
-            },
-        )
+    """질문을 보내고 답이 흘러나오는 것을 보여준다.
+
+    19일차까지는 다 만들어진 뒤에 화면을 새로 그렸다. 몇 초 동안 아무 일도
+    일어나지 않는 것처럼 보였다. 오늘은 글자가 나오는 대로 보여준다.
+    """
+    with st.chat_message("user"):
+        st.write(question)
+
+    with st.chat_message("assistant"):
+        try:
+            # st.write_stream 은 조각을 받아 화면에 이어 붙이고, 커서도 그려준다.
+            st.write_stream(
+                stream_answer(
+                    f"/conversations/{conversation_id}/chat",
+                    {
+                        "content": question,
+                        "tone": st.session_state.tone,
+                        "length": st.session_state.length,
+                    },
+                    headers=auth_headers(),
+                )
+            )
+        except ApiError as error:
+            # 실패한 질문을 기억해 둔다. 다시 시도 버튼이 이것을 쓴다.
+            # 사용자가 긴 답변을 다시 타이핑하게 만들면 안 된다.
+            st.session_state.failed_question = question
+            st.error(str(error))
+            return
+
+    st.session_state.failed_question = None
+    st.rerun()
+
+
+def regenerate(conversation_id: str) -> None:
+    """마지막 답변을 지우고 새로 받는다.
+
+    다시 시도(Retry)와 다르다.
+      다시 시도  — 실패한 요청을 그대로 다시 보낸다. 답이 없는 상태다
+      다시 생성  — 성공한 답이 마음에 안 들어 새로 받는다. 기존 답을 지운다
+    """
+    with st.chat_message("assistant"):
+        try:
+            st.write_stream(
+                stream_answer(
+                    f"/conversations/{conversation_id}/regenerate",
+                    # 질문은 다시 보내지 않는다. 서버가 마지막 질문을 그대로 쓴다.
+                    # 말투와 길이만 보낸다 — 바꿔놓고 다시 생성하는 경우가 많다.
+                    {
+                        "tone": st.session_state.tone,
+                        "length": st.session_state.length,
+                    },
+                    headers=auth_headers(),
+                )
+            )
+        except ApiError as error:
+            st.error(str(error))
+            return
     st.rerun()
 
 
@@ -199,11 +246,17 @@ def render_examples() -> None:
             st.rerun()
 
 
-def render_follow_ups(last_answer: str) -> None:
+def render_follow_ups() -> None:
+    """직전 답변을 두고 이어서 할 수 있는 행동.
+
+    17·18일차에는 직전 답변을 질문 안에 통째로 넣어 보냈다.
+    오늘부터 면접관이 이전 대화를 기억하므로 그럴 필요가 없다.
+    "방금" 이라고만 해도 알아듣는다.
+    """
     st.caption("이어서")
     actions = {
-        "더 자세히": f"방금 한 이 말을 예시를 들어 더 자세히 설명해 주세요.\n\n{last_answer}",
-        "간단하게": f"방금 한 이 말을 세 문장으로 줄여 주세요.\n\n{last_answer}",
+        "더 자세히": "방금 한 말을 예시를 들어 더 자세히 설명해 주세요.",
+        "간단하게": "방금 한 말을 세 문장으로 줄여 주세요.",
         "다음 질문": "다음 면접 질문을 하나 주세요.",
     }
     columns = st.columns(len(actions))
@@ -211,16 +264,6 @@ def render_follow_ups(last_answer: str) -> None:
         if column.button(label, use_container_width=True):
             st.session_state.pending_question = question
             st.rerun()
-
-
-def _remembered_count(messages: list, max_history: int) -> int:
-    """모델에게 실제로 갈 메시지 수. 백엔드 _build_history 와 같은 순서로 센다."""
-    for index in range(len(messages) - 1, -1, -1):
-        if messages[index]["role"] == "system":
-            messages = messages[index + 1 :]
-            break
-    usable = [m for m in messages if m["role"] in ("user", "assistant")]
-    return min(len(usable), max_history)
 
 
 def render_context_controls(
@@ -234,7 +277,11 @@ def render_context_controls(
     remembered = _remembered_count(messages, max_history)
     reset_column, info_column = st.columns([1, 3])
     if reset_column.button("맥락 초기화", use_container_width=True):
-        api("POST", f"/conversations/{conversation_id}/reset-context")
+        api(
+            "POST",
+            f"/conversations/{conversation_id}/reset-context",
+            headers=auth_headers(),
+        )
         st.rerun()
     info_column.caption(
         f"면접관은 지금 이 대화의 최근 {remembered}개를 기억합니다 "
@@ -242,11 +289,60 @@ def render_context_controls(
     )
 
 
-def render_conversation(conversation_id: str, max_history: int) -> None:
-    messages = api("GET", f"/conversations/{conversation_id}/messages")
+def _remembered_count(messages: list, max_history: int) -> int:
+    """모델에게 실제로 갈 메시지 수. 백엔드 _build_history 와 같은 순서로 센다."""
+    for index in range(len(messages) - 1, -1, -1):
+        if messages[index]["role"] == "system":
+            messages = messages[index + 1 :]
+            break
+    usable = [m for m in messages if m["role"] in ("user", "assistant")]
+    return min(len(usable), max_history)
 
-    # if messages:
-    #     render_context_controls(conversation_id, messages, max_history)
+
+def render_feedback(conversation_id: str, message_id: str, current: str | None) -> None:
+    """이 답변이 도움이 됐는지 묻는다.
+
+    이미 누른 것은 눌린 상태로 보여야 한다. 그렇지 않으면 사용자가
+    자기가 평가했는지 기억하지 못하고 계속 다시 누른다.
+    """
+    up_column, down_column, _ = st.columns([1, 1, 8])
+    up_column.button(
+        "좋아",
+        key=f"up_{message_id}",
+        type="primary" if current == "up" else "secondary",
+        on_click=_toggle_feedback,
+        args=(conversation_id, message_id, "up", current),
+    )
+    down_column.button(
+        "별로",
+        key=f"down_{message_id}",
+        type="primary" if current == "down" else "secondary",
+        on_click=_toggle_feedback,
+        args=(conversation_id, message_id, "down", current),
+    )
+
+
+def _toggle_feedback(
+    conversation_id: str, message_id: str, value: str, current: str | None
+) -> None:
+    # 같은 것을 다시 누르면 취소다. 잘못 누른 것을 되돌릴 수 없으면 안 된다.
+    api(
+        "POST",
+        f"/conversations/{conversation_id}/feedback",
+        headers=auth_headers(),
+        json={"message_id": message_id, "value": None if current == value else value},
+    )
+
+
+def render_conversation(conversation_id: str, max_history: int) -> None:
+
+    messages = api(
+        "GET", f"/conversations/{conversation_id}/messages", headers=auth_headers()
+    )
+    feedback = (
+        api("GET", f"/conversations/{conversation_id}/feedback", headers=auth_headers())
+        or {}
+    )
 
     if not messages:
         render_empty(
@@ -255,7 +351,8 @@ def render_conversation(conversation_id: str, max_history: int) -> None:
         )
         render_examples()
 
-    for message in messages:
+    last_index = len(messages) - 1
+    for index, message in enumerate(messages):
         if message["role"] == "system":
             # 맥락을 끊은 지점. 말풍선이 아니라 구분선으로 그린다.
             # 누가 한 말이 아니라 "여기서 끊겼다"는 표시이기 때문이다.
@@ -264,11 +361,33 @@ def render_conversation(conversation_id: str, max_history: int) -> None:
             continue
         with st.chat_message(message["role"]):
             st.write(message["content"])
+            if message["role"] == "assistant":
+                render_feedback(
+                    conversation_id, message["id"], feedback.get(message["id"])
+                )
+                if index == last_index:
+                    # 다시 생성은 마지막 답변에만 붙인다. 중간 답변을 다시 만들면
+                    # 그 뒤의 대화와 앞뒤가 안 맞게 된다.
+                    if st.button("다시 생성", key=f"regen_{message['id']}"):
+                        regenerate(conversation_id)
 
-    render_context_controls(conversation_id, messages, max_history=10)
+    if st.session_state.failed_question:
+        # 답을 못 받은 상태다. 같은 질문을 그대로 다시 보낼 수 있게 한다.
+        st.warning("답변을 받지 못했습니다.")
+        retry_column, cancel_column, _ = st.columns([1, 1, 6])
+        if retry_column.button("다시 시도"):
+            question = st.session_state.failed_question
+            st.session_state.failed_question = None
+            ask(conversation_id, question)
+        if cancel_column.button("취소"):
+            st.session_state.failed_question = None
+            st.rerun()
+
+    if messages:
+        render_context_controls(conversation_id, messages, max_history)
 
     if messages and messages[-1]["role"] == "assistant":
-        render_follow_ups(messages[-1]["content"])
+        render_follow_ups()
 
     if st.session_state.pending_question:
         question = st.session_state.pending_question
