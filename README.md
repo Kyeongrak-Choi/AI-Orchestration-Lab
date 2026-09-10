@@ -17,7 +17,7 @@
 <a id="git-collaboration"></a>
 
 <details>
-<summary><strong>📖 Git Collaboration (2026-git-start)</strong></summary>
+<summary><strong>📖 Git Collaboration (git-start)</strong></summary>
 
 -------------------------
 
@@ -127,7 +127,7 @@ git push origin main
 <a id="python-basic"></a>
 
 <details>
-<summary><strong>🐍 Python Basic (2026_aio2_python-basic)</strong></summary>
+<summary><strong>🐍 Python Basic (python-basic)</strong></summary>
 
 # 🐍 Python Basic
 
@@ -165,7 +165,7 @@ A repository for learning Python fundamentals, from basic syntax to object-orien
 <a id="fastapi-basic"></a>
 
 <details>
-<summary><strong>⚡ FastAPI Basic (2026_aio2_fastapi)</strong></summary>
+<summary><strong>⚡ FastAPI Basic (fastapi)</strong></summary>
 
   # 📚 FastAPI Basic
 
@@ -284,7 +284,7 @@ uvicorn main:app --reload
 <a id="llm-api"></a>
 
 <details>
-<summary><strong>🤖 LLM API (2026-aio2_llm-api)</strong></summary>
+<summary><strong>🤖 LLM API (llm-api)</strong></summary>
 
 # LLM API 기초 실습
 
@@ -316,7 +316,7 @@ Gemini와 OpenAI API를 직접 호출하며 LLM 애플리케이션의 기본 개
 ## 프로젝트 구조
 
 ```text
-2026-aio2_llm-api/
+4_llm-api/
 ├── notebooks/
 │   ├── 01_first_call.ipynb          # 첫 호출, 응답 구조, 시스템 지침, 오류 처리
 │   ├── 02_tokens_and_cost.ipynb     # 토큰 계산, 과금, 사용량 제한
@@ -334,7 +334,7 @@ Gemini와 OpenAI API를 직접 호출하며 LLM 애플리케이션의 기본 개
 ### 1. 프로젝트 디렉터리로 이동
 
 ```powershell
-cd 2026-aio2_llm-api
+cd 4_llm-api
 ```
 
 ### 2. 의존성 설치
@@ -460,7 +460,7 @@ Invoke-RestMethod `
 <a id="database-development"></a>
 
 <details>
-<summary><strong>🗄 Database Development (2026-aio2_db-dev)</strong></summary>
+<summary><strong>🗄 Database Development (db-dev)</strong></summary>
 
 # Database Development 실습
 
@@ -496,7 +496,7 @@ Supabase에서 관계형 데이터를 설계하고 Python으로 CRUD를 수행�
 ## 프로젝트 구조
 
 ```text
-2026-aio2_db-dev/
+5_db-dev/
 ├── 1_supabase-basic-test/
 │   ├── docs/                     # Supabase·FastAPI·Auth·Redis 상세 실습 문서
 │   ├── sql/create_users.sql      # Supabase 기초 테이블 생성 SQL
@@ -582,7 +582,7 @@ Supabase 프로젝트를 만든 뒤 Project URL과 API Key를 확인합니다. �
 실습할 하위 프로젝트에 `.env` 파일을 만듭니다. 채팅 서비스는 다음과 같이 설정합니다.
 
 ```powershell
-cd 2026-aio2_db-dev\2_chat_service\backend
+cd 5_db-dev\2_chat_service\backend
 Copy-Item .env.example .env
 ```
 
@@ -605,7 +605,7 @@ Supabase 기초 프로젝트에는 `SUPABASE_URL`과 `SUPABASE_SERVICE_ROLE_KEY`
 ### Supabase 기초 실습
 
 ```powershell
-cd 2026-aio2_db-dev\1_supabase-basic-test
+cd 5_db-dev\1_supabase-basic-test
 uv sync
 ```
 
@@ -614,7 +614,7 @@ VS Code 등 Jupyter Notebook을 지원하는 편집기에서 `supabase-client.ip
 ### FastAPI 채팅 서비스
 
 ```powershell
-cd 2026-aio2_db-dev\2_chat_service\backend
+cd 5_db-dev\2_chat_service\backend
 uv sync
 uv run uvicorn app.main:app --reload
 ```
@@ -628,7 +628,7 @@ uv run uvicorn app.main:app --reload
 ### Redis 노트북 실습
 
 ```powershell
-cd 2026-aio2_db-dev\3_redis-basic-test
+cd 5_db-dev\3_redis-basic-test
 Copy-Item .env.example .env
 uv sync
 ```
