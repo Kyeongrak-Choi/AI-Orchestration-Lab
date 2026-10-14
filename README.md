@@ -11,7 +11,7 @@
 - [🗄 Database Development](#database-development)
 - [🧠 LLM Application Development](#llm-application-development)
 - [🎨 UI / UX Practice](#ui-ux-practice)
-- [🚀 Agent Development]
+- [🚀 Agent Development](#agent-development)
 
 ---
 
@@ -961,10 +961,10 @@ Home
 
 <br />
 
-<a id="coming-soon"></a>
+<a id="agent-development"></a>
 
 <details>
-<summary><strong>🚀 Coming Soon</strong></summary>
+<summary><strong>🚀 Agent Development</strong></summary>
 
 </details>
 
