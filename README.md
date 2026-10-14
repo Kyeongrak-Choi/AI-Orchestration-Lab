@@ -9,6 +9,7 @@
 - [⚡ FastAPI Basic](#fastapi-basic)
 - [🤖 LLM API](#llm-api)
 - [🗄 Database Development](#database-development)
+- [🧠 LLM Application Development](#llm-application-development)
 - [🎨 UI / UX Practice](#ui-ux-practice)
 - [🚀 Coming Soon](#coming-soon)
 
@@ -685,6 +686,200 @@ Redis 데이터는 원본이 아닌 사본입니다. 캐시 조회에 실패하�
 - **`422 Unprocessable Entity`**: 요청 본문의 필드와 UUID 형식이 Pydantic 모델에 맞는지 확인합니다.
 
     
+</details>
+
+<br />
+
+<a id="llm-application-development"></a>
+
+<details>
+<summary><strong>🧠 LLM Application Development (llm-app-dev)</strong></summary>
+
+# LLM Application Development 실습
+
+OpenAI API와 LangChain 생태계를 활용해 **프롬프트 설계부터 도구 에이전트, MCP, RAG, 메모리, LangGraph 워크플로, 실행 추적까지** 단계적으로 구현하는 LLM 애플리케이션 개발 실습입니다.
+
+단순히 모델의 답변을 출력하는 데서 끝나지 않고, 구조화된 출력·입출력 검증·프롬프트 인젝션 방어·외부 도구 연결·문서 검색·품질 평가·상태 저장을 조합해 실제 서비스에 가까운 흐름을 구성합니다.
+
+> 노트북에는 개념 설명, 오류 재현, 비교 실험, 학습자용 TODO 셀이 함께 포함되어 있습니다. 실행 결과와 호출 비용은 모델·데이터·외부 서비스 상태에 따라 달라질 수 있습니다.
+
+## 학습 로드맵
+
+| 모듈 | 범위 | 주요 내용 |
+| --- | --- | --- |
+| M1. 프롬프트와 안전성 | Day00~Day04 | Zero-shot/Few-shot, CoT, 역할 프롬프트, ChatPromptTemplate, LCEL, Pydantic 구조화 출력, Prompt Injection 방어 |
+| M2. 도구와 에이전트 | Day05~Day09 | Function Calling, LangChain Tool, 외부 API·스크래핑, MCP, `create_agent`, ReAct, 멀티툴 의사결정과 실패 대응 |
+| M3. 지식과 기억 | Day10~Day13 | 임베딩·코사인 유사도, Chroma, PostgreSQL/pgvector, 세션 메모리, PDF 전처리, 질의 개선, 하이브리드 검색·리랭킹·RAG 평가 |
+| M4. 워크플로와 통합 | Day14~Day17 | LangGraph State/Node/Edge, 조건 분기·반복·병렬 처리, Hybrid Memory, 체크포인트, Self-Reflection, Planning·Tracing 통합 |
+
+## 주요 학습 내용
+
+- **프롬프트 엔지니어링**: Zero-shot, Few-shot, 역할 지정, 출력 형식 제어, 재사용 가능한 프롬프트 팩토리
+- **LCEL과 체인**: `ChatPromptTemplate | ChatOpenAI | StrOutputParser` 구성, 변수 바인딩, 배치 실행, 오류 확인
+- **신뢰할 수 있는 출력**: Pydantic 모델·Enum·중첩 모델·필드 검증을 이용한 Structured Output
+- **안전한 LLM 호출**: 입력 위험 패턴 차단, 외부 문서의 간접 인젝션 대응, 출력 검증과 민감한 시스템 지시 보호
+- **Function Calling과 Tool**: 모델의 `tool_calls`를 해석하고 도구를 실행한 뒤 `ToolMessage`로 결과를 되돌리는 전체 루프
+- **MCP와 에이전트**: stdio MCP 서버에서 도구를 검색하고, Function Calling과 MCP의 구조적 차이를 비교하며 여러 도구를 사용하는 에이전트 구현
+- **브라우저 자동화와 외부 데이터**: Playwright, BeautifulSoup, `yfinance`, 뉴스·환율·금 시세 등 외부 데이터 도구 연결
+- **임베딩과 Vector DB**: `text-embedding-3-small`, 코사인 유사도, Chroma 로컬 저장소, PostgreSQL `pgvector` 검색
+- **RAG 고도화**: 문서 청킹, PDF→Markdown 변환, Query Rewriting, HyDE, Multi-Query, RAG Fusion, BM25+의미 검색, FlashRank 재순위
+- **RAG 평가**: Context Hit, Faithfulness, Answer Relevancy, Answer Correctness, Precision@5를 이용한 검색·생성 품질 비교
+- **상태 기반 워크플로**: LangGraph의 StateGraph, 노드·엣지, 조건 분기, 루프, fan-out/fan-in, Planning·Executor·Replanner 패턴
+- **메모리와 개선 루프**: 세션별 대화 기억, 장기 지식 검색, `MemorySaver`/`PostgresSaver`, 생성-비평-수정 Self-Reflection
+- **관찰 가능성**: `.stream`으로 노드별 실행 흐름과 소요 시간을 확인하고, 선택적으로 LangSmith에서 프롬프트·토큰·실패 지점을 추적
+
+## 기술 스택
+
+- Python 3.11+
+- `uv`, Jupyter Notebook / IPykernel
+- OpenAI API (`gpt-4o-mini`, `text-embedding-3-small`)
+- LangChain, LangGraph, LangChain MCP Adapters, Pydantic
+- PostgreSQL / `pgvector`, Psycopg, SQLAlchemy
+- ChromaDB, BM25, FlashRank
+- PyMuPDF / PyMuPDF4LLM, BeautifulSoup, pandas, yfinance
+- Playwright / Chromium
+- 선택 사항: LangSmith
+
+## 프로젝트 구조
+
+```text
+6_llm-app-dev/
+├── notebooks/
+│   ├── Day00~Day17 실습 노트북 및 MCP·Playwright 스크립트
+│   ├── data/                    # RAG 실습용 PDF 문서
+│   ├── html/sample.html         # 로컬 스크래핑 실습 대상
+│   └── chroma_store/            # Chroma 로컬 영속 저장소
+├── app.py                       # sample.html과 health를 제공하는 ASGI 앱
+├── math_server.py               # 덧셈·곱셈 MCP 서버
+├── review_server.py             # 회사 리뷰 MCP 서버
+├── book_server.py               # SQLite 기반 도서 조회 MCP 서버
+├── book_host_bot.py             # OpenAI 모델과 도서 MCP 서버를 연결하는 호스트
+├── mcp_demo.py                  # MCP 도구 검색 데모
+├── playwright_test_01.py        # 브라우저 실행 기본 예제
+├── playwright_test_02.py        # quotes.toscrape.com 스크래핑 예제
+├── pyproject.toml               # 의존성 및 프로젝트 설정
+├── uv.lock                      # 의존성 잠금 파일
+└── .env.example                 # 환경변수 예시
+```
+
+`my_database.db`, `notebooks/chroma_store/`, `flashrank_cache/`는 각각 도서 MCP·Chroma·FlashRank 실습에서 사용하는 로컬 데이터 또는 캐시입니다.
+
+## 시작하기
+
+### 1. 의존성 설치
+
+```powershell
+cd 6_llm-app-dev
+uv sync
+```
+
+### 2. 환경변수 설정
+
+```powershell
+Copy-Item .env.example .env
+```
+
+`.env`에 최소한 OpenAI API 키를 입력합니다.
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
+
+# Day11 이후 PostgreSQL·pgvector·체크포인터 실습에 필요
+DATABASE_URL=postgresql://user:password@host:5432/database
+
+# Day11 확장 투자 리서치 실습에서 선택적으로 사용
+OPENAI_MODEL=gpt-4o-mini
+
+# Day17 부록 LangSmith 추적에서 선택적으로 사용
+LANGSMITH_API_KEY=your_langsmith_api_key
+LANGSMITH_PROJECT=llm-dev-day17
+```
+
+Day12 이후 RAG 실습을 실행하려면 PostgreSQL에 `vector` 확장을 활성화해야 합니다.
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+### 3. 노트북 실행
+
+VS Code 등 Jupyter를 지원하는 편집기에서 `notebooks`의 파일을 열고 `6_llm-app-dev/.venv`를 커널로 선택합니다. 기본적으로 아래 순서대로 진행합니다.
+
+```text
+Day00 → Day01 → Day02 → Day03 → Day04
+      → Day05 → Day06 → Day07 → Day08 → Day09
+      → Day10 → Day11 → Day12 → Day13-1~4
+      → Day14 → Day15 → Day16 → Day17
+      → Day17-부록-LangSmith추적 (선택)
+```
+
+Day11 확장 노트북은 기본 세션 메모리 실습을 먼저 진행한 뒤 실행하는 것을 권장합니다.
+
+## 실행 예제
+
+### 로컬 ASGI 페이지와 스크래핑
+
+`app.py`는 `notebooks/html/sample.html`을 제공하는 간단한 ASGI 앱입니다.
+
+```powershell
+uv run uvicorn app:app --reload
+```
+
+이후 `http://127.0.0.1:8000/sample.html`을 열어 페이지를 확인할 수 있습니다. Playwright 예제를 실행하려면 최초 1회 Chromium을 설치합니다.
+
+```powershell
+uv run playwright install chromium
+uv run python playwright_test_02.py
+```
+
+스크래핑 예제는 외부 사이트에 접속하므로 네트워크 상태와 대상 사이트의 정책에 영향을 받습니다.
+
+### MCP 도구 호스트
+
+MCP 서버는 stdio로 실행되는 별도 프로세스이며, 호스트 프로그램이 서버의 도구를 가져와 LLM에 바인딩합니다.
+
+```powershell
+uv run python mcp_demo.py
+uv run python book_host_bot.py
+```
+
+`book_host_bot.py`는 `book_server.py`의 `get_book_by_rank`, `search_book` 도구를 연결해 도서 순위 조회와 제목·저자 검색을 수행합니다. `math_server.py`와 `review_server.py`는 Day07 Function Calling vs MCP 비교 실습에서 사용합니다.
+
+Windows에서 MCP stdio를 사용하는 Day07·Day08 스크립트는 Jupyter 셀보다 터미널에서 `uv run python`으로 실행하는 것을 권장합니다.
+
+## 최종 통합 프로젝트
+
+Day17에서는 앞선 모듈의 결과를 하나의 모의면접 코치·리서치 도우미 흐름으로 통합합니다.
+
+```text
+사용자 질문
+   │
+   ▼
+입력 방어 → 계획(Planning) → 지식 검색(pgvector) → 도구/LLM 답변
+                                      │
+                                      ▼
+                               비평·품질 확인
+                                  ├─ 부족: 수정 루프
+                                  └─ 통과: 최종 답변·대화 기억 저장
+```
+
+- M1의 시스템 프롬프트와 입력·출력 방어
+- M2의 도구 호출과 에이전트
+- M3의 pgvector 지식 검색과 세션 기억
+- M4의 LangGraph 분기·반복·체크포인트·Self-Reflection
+- `.stream` 실행 로그와 LangSmith 선택적 추적
+
+을 하나의 실행 흐름으로 연결해, LLM 애플리케이션을 구성 요소 단위로 설계하고 관찰하는 방법을 연습합니다.
+
+## 주의 사항
+
+- OpenAI API와 임베딩 호출에는 비용이 발생할 수 있으며, 반복 실행 시 사용량을 확인해야 합니다.
+- `OPENAI_API_KEY`, `DATABASE_URL`, `LANGSMITH_API_KEY`와 같은 비밀값은 커밋하지 않습니다.
+- Day11~Day13, Day15, Day17의 PostgreSQL·pgvector 실습은 외부 DB 연결이 필요합니다. 연결 정보가 없으면 해당 실습을 실행할 수 없습니다.
+- Playwright·yfinance·뉴스/스크래핑 예제는 외부 네트워크와 대상 서비스의 응답에 의존합니다.
+- LangSmith 추적은 선택 사항이며, 다른 노트북은 기본적으로 추적을 끄도록 구성되어 있습니다. 민감한 입력·출력은 추적 서비스로 보내지 않도록 주의합니다.
+- 교육용 실습 코드이므로 인증, 비밀 관리, 요청 제한, 운영 로깅, 테스트와 같은 운영 환경 보강이 필요합니다.
+
 </details>
 
 <br />
