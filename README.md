@@ -11,7 +11,7 @@
 - [🗄 Database Development](#database-development)
 - [🧠 LLM Application Development](#llm-application-development)
 - [🎨 UI / UX Practice](#ui-ux-practice)
-- [🚀 Coming Soon](#coming-soon)
+- [🚀 Agent Development]
 
 ---
 
