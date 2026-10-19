@@ -53,6 +53,7 @@ PERSPECTIVES = {
     "optimist": ("낙관 분석가", "이 서비스의 강점과 성장 기회를 찾는다"),
     "pessimist": ("비관 분석가", "이 서비스의 약점과 사업 위험을 찾는다"),
     "customer": ("고객 분석가", "이용자 입장에서 좋은 점과 불편한 점을 찾는다"),
+    "finance": ("재무 분석가", "수익 구조와 비용 관점에서 지속 가능성을 분석한다."),
 }
 
 
@@ -109,8 +110,9 @@ def build_team(get_source):
 
     async def fetch_node(state):
         # 자료실(MCP 서버)에서 원문을 받아 State의 source 칸에 담는다
-        # TODO 1: get_source 도구를 ainvoke로 불러 state의 자료 이름(name)에 해당하는 원문을 받고,
-        #         to_text로 바꿔 source에 담으세요 (Day04-MCP자료실연결-정답.py의 4)번과 같은 호출)
+        source = to_text(
+            await get_source.ainvoke({"name": state["name"]})
+        )
         return {"source": source}
 
     def dispatch(state):
@@ -128,10 +130,10 @@ def build_team(get_source):
     g.add_node("fetch", fetch_node)
     g.add_node("analyst", analyst_node)
     g.add_node("aggregator", aggregator_node)
+    
     g.add_edge(START, "fetch")
-    # TODO 2: fan-out — 자료를 받은 뒤(fetch)에 dispatch로 분석가들을 보내는 조건 엣지를 추가하세요
-    #         (노트북 3-1은 START에서 보냈다. 이번에는 어디서 보내야 할까요?)
-    # TODO 3: fan-in — 분석가들이 통합자로 모이는 엣지를 추가하세요
+    g.add_conditional_edges("fetch", dispatch, ["analyst"])
+    g.add_edge("analyst", "aggregator")
     g.add_edge("aggregator", END)
     return g.compile()
 
@@ -152,19 +154,34 @@ async def main():
 
     # 3) 자료 이름만 넘긴다 — 원문은 그래프의 fetch 노드가 자료실에서 받아 온다
     start = time.time()
-    # TODO 4: research_team을 ainvoke로 실행하세요. 자료 이름 "새벽 수영 클럽"과 빈 analyses만 넘깁니다
-    #         (source는 넘기지 않는다 — fetch 노드가 채운다)
-    print(f"\n[실행 시간] {time.time() - start:.1f}초")
+    result = await research_team.ainvoke(
+        {"name": "새벽 수영 클럽", "analyses": []}
+    )
+    print("\n" + "=" * 60)
+    print("MCP 자료실 기반 병렬 조사 결과")
+    print("=" * 60)
+    print(f"실행 시간: {time.time() - start:.1f}초")
+    print(f"자료: {result['source'].splitlines()[0]}")
+    print(f"분석가 수: {len(result['analyses'])}명")
 
-    print("[받은 자료 첫 줄]", result["source"].splitlines()[0])
-    print("[수집된 분석]", len(result["analyses"]), "건")
+    print("\n[관점별 분석]")
+    for analysis in result["analyses"]:
+        print(f"\n• {analysis['perspective']}")
+        for index, point in enumerate(analysis["points"], start=1):
+            print(f"  {index}. {point}")
+
     report = result["report"]
-    print("\n[제목]", report["title"])
-    print("[요약]", report["summary"])
-    print("[충돌 지점]")
-    for c in report["conflicts"]:
-        print("-", c)
-    print("[종합 판단]", report["recommendation"])
+    print("\n[통합 보고서]")
+    print(f"제목: {report['title']}")
+    print(f"요약: {report['summary']}")
+    print("충돌 지점:")
+    if report["conflicts"]:
+        for index, conflict in enumerate(report["conflicts"], start=1):
+            print(f"  {index}. {conflict}")
+    else:
+        print("  없음")
+    print(f"종합 판단: {report['recommendation']}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":

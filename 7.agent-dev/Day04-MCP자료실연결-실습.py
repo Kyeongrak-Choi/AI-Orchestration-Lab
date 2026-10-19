@@ -35,6 +35,7 @@ PERSPECTIVES = {
     "optimist": ("낙관 분석가", "이 서비스의 강점과 성장 기회를 찾는다"),
     "pessimist": ("비관 분석가", "이 서비스의 약점과 사업 위험을 찾는다"),
     "customer": ("고객 분석가", "이용자 입장에서 좋은 점과 불편한 점을 찾는다"),
+    "finance": ("재무 분석가", "수익 구조와 비용 관점에서 지속 가능성을 분석한다."),
 }
 
 
@@ -61,26 +62,34 @@ def to_text(result):
 
 async def main():
     # 1) 자료실 서버에 연결하고 도구를 불러온다
-    # TODO: MultiServerMCPClient로 자료실 서버에 연결하는 client를 만드세요
-    #       서버 이름 "library", 실행 명령 sys.executable, 인자 [SERVER],
-    #       transport는 2과목 Day 7처럼 로컬 서브프로세스로 연결하는 방식
+    client = MultiServerMCPClient(
+        {
+            "library": {
+                "command": sys.executable,
+                "args": [SERVER],
+                "transport": "stdio",
+            }
+        }
+    )
     tools = await client.get_tools()
     tool_map = {}
     for t in tools:
         tool_map[t.name] = t
-    print("[자료실 도구]", list(tool_map))
+    print("[1.자료실 도구]", list(tool_map))
 
     # 2) 어떤 자료가 있는지 묻는다
-    # TODO: 자료 이름 목록을 돌려주는 도구를 tool_map에서 꺼내 ainvoke로 부르고, to_text로 바꿔 names에 담으세요
-    print("[자료 목록]", names)
+    names = to_text(await tool_map["list_sources"].ainvoke({}))
+    print("[2.자료 목록]", names)
 
     # 3) 없는 자료를 요청하면? — 서버가 안내 문구를 돌려준다
     missing = to_text(await tool_map["get_source"].ainvoke({"name": "한강 요가 모임"}))
-    print("[없는 자료 요청]", missing)
+    print("[3.없는 자료 요청]", missing)
 
     # 4) 자료를 받아 분석 팀에 넘긴다 — 분석가 코드는 자료가 어디서 왔는지 모른다
-    # TODO: 원문을 돌려주는 도구로 "새벽 수영 클럽" 자료를 받아 to_text로 바꿔 source에 담으세요
-    print("\n[받은 자료 첫 줄]", source.splitlines()[0])
+    source = to_text(
+        await tool_map["get_source"].ainvoke({"name": "새벽 수영 클럽"})
+    )
+    print("\n[4.받은 자료 첫 줄]", source.splitlines()[0])
 
     for key in PERSPECTIVES:
         a = analyze(key, source)
