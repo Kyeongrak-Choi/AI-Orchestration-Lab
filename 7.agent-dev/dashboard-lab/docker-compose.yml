@@ -1,0 +1,51 @@
+# Day 11 — 앱 + 이력 DB를 함께 띄운다 (docker compose)
+# 실행: docker compose up --build -d
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # .env의 값을 가져온다 (파일에 비밀번호를 적지 않는다)
+    volumes:
+      - pgdata:/var/lib/postgresql              # 컨테이너를 지워도 이력 데이터는 남긴다
+    ports:
+      - "5433:5432"             # 내 PC의 5432는 로컬 PostgreSQL이 쓰고 있을 수 있어 5433으로 연다
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    env_file: .env
+    environment:
+      # 컨테이너 안에서는 localhost가 아니라 서비스 이름 db로 접속한다 (서비스 디스커버리)
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy   # DB가 준비된 뒤에 앱을 띄운다
+    restart: unless-stopped
+
+  # (선택 과제) 대시보드도 컨테이너로 띄운다 — docker compose --profile dashboard up --build -d
+  dashboard:
+    build: .                    # 앱과 같은 이미지 (requirements.txt에 streamlit·pandas가 들어 있다)
+    profiles: ["dashboard"]     # --profile dashboard를 붙일 때만 뜬다 → 기본 실행에는 영향이 없다
+    command: ["streamlit", "run", "dashboard.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+    ports:
+      - "8501:8501"
+    healthcheck:                # Dockerfile의 점검(8000번 /health) 대신 Streamlit의 점검 주소를 본다
+      test: ["CMD", "python", "-c", "import httpx; exit(0 if httpx.get('http://127.0.0.1:8501/_stcore/health').status_code == 200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

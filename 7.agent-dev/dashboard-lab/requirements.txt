@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pytest
+httpx
+langchain-openai
+python-dotenv
+tenacity
+psycopg2-binary
+streamlit
+pandas
