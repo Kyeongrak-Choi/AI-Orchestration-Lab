@@ -1,0 +1,21 @@
+%%{init: {"flowchart": {"useMaxWidth": true, "nodeSpacing": 20, "rankSpacing": 40}}}%%
+flowchart TB
+    MC(("Marie Curie")):::person
+    PC(("Pierre Curie")):::person
+    UP(("University<br/>of Paris")):::org
+    NP(("Nobel Prize")):::award
+    RW(("Robin<br/>Williams")):::noise
+    FD["Physics · Chemistry<br/>(Field, 연결 없음)"]:::field
+
+    MC -->|MARRIED| PC
+    MC -->|WORKS_AT| UP
+    MC -->|WON ×2| NP
+    PC -->|WON| NP
+    NP ~~~ RW
+    RW ~~~ FD
+
+    classDef person fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+    classDef org fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+    classDef award fill:#fff8e1,stroke:#f9a825,color:#5d4037
+    classDef noise fill:#ffebee,stroke:#c62828,color:#b71c1c
+    classDef field fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20,stroke-dasharray:4 3

@@ -1,0 +1,67 @@
+# GraphRAG 실습용 Neo4j 세 개
+#
+#   서비스       | 데이터            | Bolt (NEO4J_URI)        | Browser                | 차시
+#   -------------|-------------------|-------------------------|------------------------|-------------
+#   neo4j-reco   | Recommendations   | bolt://localhost:7687   | http://localhost:7474  | s04, s07, 03, 04
+#   neo4j-pole   | POLE              | bolt://localhost:7688   | http://localhost:7475  | s06, 02
+#   neo4j-empty  | 빈 DB             | bolt://localhost:7689   | http://localhost:7476  | s05, 01
+#
+# 사용법 (프로젝트 루트의 PowerShell)
+#   docker compose -f docker/docker-compose.yml up -d --wait            세 개 모두 시작 (접속 가능해질 때까지 기다림)
+#   docker compose -f docker/docker-compose.yml up -d --wait neo4j-empty  하나만 시작
+#   docker compose -f docker/docker-compose.yml stop                    정지 (데이터 유지)
+#
+# 처음 build할 때 덤프 파일을 내려받는다. 이후에는 인터넷 없이 시작된다.
+# 사용자 이름 neo4j, 비밀번호 graphrag-class. NEO4J_AUTH는 볼륨을 처음 쓸 때만 적용된다.
+# 데이터는 볼륨(neo4j_*_data)에 있다. 초기화하려면 해당 볼륨을 지우고 다시 up 한다.
+
+name: graphrag-neo4j
+
+x-neo4j: &neo4j
+  environment:
+    NEO4J_AUTH: neo4j/graphrag-class
+  healthcheck:
+    test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+    interval: 5s
+    timeout: 3s
+    retries: 30
+    start_period: 10s
+
+services:
+  neo4j-reco:
+    <<: *neo4j
+    build:
+      context: .
+      args:
+        DUMP_URL: https://github.com/neo4j-graph-examples/recommendations/raw/main/data/recommendations-5.26.dump
+    image: graphrag-neo4j:reco
+    container_name: neo4j-reco
+    ports: ["7474:7474", "7687:7687"]
+    volumes: ["reco_data:/data"]
+
+  neo4j-pole:
+    <<: *neo4j
+    build:
+      context: .
+      args:
+        DUMP_URL: https://github.com/neo4j-graph-examples/pole/raw/main/data/pole-50.dump
+    image: graphrag-neo4j:pole
+    container_name: neo4j-pole
+    ports: ["7475:7474", "7688:7687"]
+    volumes: ["pole_data:/data"]
+
+  neo4j-empty:
+    <<: *neo4j
+    build: .
+    image: graphrag-neo4j:empty
+    container_name: neo4j-empty
+    ports: ["7476:7474", "7689:7687"]
+    volumes: ["empty_data:/data"]
+
+volumes:
+  reco_data:
+    name: neo4j_reco_data
+  pole_data:
+    name: neo4j_pole_data
+  empty_data:
+    name: neo4j_empty_data
